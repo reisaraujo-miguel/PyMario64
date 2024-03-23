@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "pymario64"
+version = "0.0.1"
+description = "Little Super Mario 64 \"clone\" written in Python"
+authors = ["reisaraujo-miguel <reisaraujo.miguel@gmail.com>"]
+license = "GPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+glfw = "^2.7.0"
+PyOpenGL = "^3.1.7"
+numpy = "^1.26.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
