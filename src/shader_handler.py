@@ -1,57 +1,56 @@
-import OpenGL.GL.shaders
-from OpenGL.GL import *
+import OpenGL.GL as gl
 
 
 def get_shaders():
     vertex_code = """
-		attribute vec2 position;
-		uniform mat4 mat_transformation;
-		void main() {
-			gl_Position = mat_transformation * vec4(position,0.0,1.0);
-		}
-		"""
+        attribute vec2 position;
+        uniform mat4 mat_transformation;
+        void main() {
+            gl_Position = mat_transformation * vec4(position,0.0,1.0);
+        }
+        """
     fragment_code = """
-		void main() {
-			gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-		}
-		"""
+        void main() {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+        """
 
-    vertex = glCreateShader(GL_VERTEX_SHADER)
-    fragment = glCreateShader(GL_FRAGMENT_SHADER)
+    vertex = gl.glCreateShader(gl.GL_VERTEX_SHADER)
+    fragment = gl.glCreateShader(gl.GL_FRAGMENT_SHADER)
 
-    glShaderSource(vertex, vertex_code)
-    glShaderSource(fragment, fragment_code)
+    gl.glShaderSource(vertex, vertex_code)
+    gl.glShaderSource(fragment, fragment_code)
 
     return vertex, fragment
 
 
 def compile_shader(shader):
-    glCompileShader(shader)
+    gl.glCompileShader(shader)
 
-    if not glGetShaderiv(shader, GL_COMPILE_STATUS):
-        print(glGetShaderInfoLog(shader).decode())
+    if not gl.glGetShaderiv(shader, gl.GL_COMPILE_STATUS):
+        print(gl.glGetShaderInfoLog(shader).decode())
         raise RuntimeError("Error compiling shader!")
 
 
 def link_program(program):
-    glLinkProgram(program)
+    gl.glLinkProgram(program)
 
-    if not glGetProgramiv(program, GL_LINK_STATUS):
-        print(glGetProgramInfoLog(program).decode())
-        raise RuntimeError('Error linking program')
+    if not gl.glGetProgramiv(program, gl.GL_LINK_STATUS):
+        print(gl.glGetProgramInfoLog(program).decode())
+        raise RuntimeError("Error linking program")
 
 
-def send_to_gpu(vertices, program):
-    buffer = glGenBuffers(1)
+def send_to_gpu(vert, program):
+    buffer = gl.glGenBuffers(1)
 
-    glBindBuffer(GL_ARRAY_BUFFER, buffer)
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, buffer)
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_DYNAMIC_DRAW)
-    glBindBuffer(GL_ARRAY_BUFFER, buffer)
+    gl.glBufferData(gl.GL_ARRAY_BUFFER, vert.nbytes, vert, gl.GL_DYNAMIC_DRAW)
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, buffer)
 
-    stride = vertices.strides[0]
-    offset = ctypes.c_void_p(0)
+    stride = vert.strides[0]
+    offset = gl.ctypes.c_void_p(0)
 
-    loc = glGetAttribLocation(program, "position")
-    glEnableVertexAttribArray(loc)
-    glVertexAttribPointer(loc, 2, GL_FLOAT, False, stride, offset)
+    loc = gl.glGetAttribLocation(program, "position")
+    gl.glEnableVertexAttribArray(loc)
+    gl.glVertexAttribPointer(loc, 2, gl.GL_FLOAT, False, stride, offset)

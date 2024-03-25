@@ -1,9 +1,15 @@
+import os
+
 import glfw
 import numpy as np
 import OpenGL.GL as gl
 
+import input_handler as inpt
 import shader_handler as shader
 from body import Body
+
+os.environ["XDG_SESSION_TYPE"] = "x11"
+
 
 glfw.init()
 glfw.window_hint(glfw.VISIBLE, glfw.FALSE)
@@ -73,6 +79,17 @@ while not glfw.window_should_close(window):
 
     gl.glClear(gl.GL_COLOR_BUFFER_BIT)
     gl.glClearColor(BG_RED, BG_GREEN, BG_BLUE, BG_ALPHA)
+
+    s_x, s_y = inpt.check_scale(window, s_x, s_y, size_factor * delta_time)
+    ship.resize(s_x, s_y)
+
+    angle = inpt.check_rotation(window, t_x, t_y, angle)
+    ship.rotate(angle)
+
+    speed = inpt.check_movement(window, speed, speed_factor)
+    t_x, t_y = ship.move_towards_mouse(window, t_x, t_y, speed * delta_time)
+    t_x, t_y = ship.screen_wrap(t_x, t_y)
+    ship.translate(t_x, t_y)
 
     ship.draw(program)
     box.draw(program)
