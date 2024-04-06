@@ -1,5 +1,3 @@
-import os
-
 import glfw
 import numpy as np
 import OpenGL.GL as gl
@@ -7,9 +5,6 @@ import OpenGL.GL as gl
 import input_handler as inpt
 import shader_handler as shader
 from body import Body
-
-os.environ["XDG_SESSION_TYPE"] = "x11"
-
 
 glfw.init()
 glfw.window_hint(glfw.VISIBLE, glfw.FALSE)
@@ -83,7 +78,7 @@ while not glfw.window_should_close(window):
     s_x, s_y = inpt.check_scale(window, s_x, s_y, size_factor * delta_time)
     ship.resize(s_x, s_y)
 
-    angle = inpt.check_rotation(window, t_x, t_y, angle)
+    angle = inpt.check_rotation(window, t_x, t_y)
     ship.rotate(angle)
 
     speed = inpt.check_movement(window, speed, speed_factor)

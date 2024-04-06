@@ -22,7 +22,7 @@ def check_scale(window, x, y, factor):
     return x, y
 
 
-def check_rotation(window, x, y, angle):
+def check_rotation(window, x, y):
     width, height = glfw.get_framebuffer_size(window)
 
     origin_x, origin_y = width / 2, height / 2
