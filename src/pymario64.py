@@ -1,3 +1,11 @@
+import os
+
+# OpenGl doesn't work well on wayland, so it's better to use XWayland
+if os.environ["XDG_SESSION_TYPE"] == "wayland":
+    os.environ["XDG_SESSION_TYPE"] = "x11"
+    print(os.environ["XDG_SESSION_TYPE"])
+
+
 import glfw
 import numpy as np
 import OpenGL.GL as gl

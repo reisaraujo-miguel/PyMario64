@@ -1,6 +1,11 @@
 # PyMario64
+
 Little Super Mario 64 "clone" written in Python using OpenGL and GLFW
 
-Needs to set XDG_SESSION_TYPE=x11 to run on wayland. For some reason it only works on wayland through XWayland.
+# Dependencies
 
-You can run `./run` and it does everything automatically.
+## Fedora
+
+```sh
+sudo dnf install libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel libXi-devel libXxf86vm-devel
+```
