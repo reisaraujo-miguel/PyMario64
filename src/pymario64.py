@@ -74,7 +74,7 @@ def projection():
 polygonal_mode = False
 
 
-def key_event(key, action):
+def key_event(window, key, scancode, action, mods):
     global camera_pos, camera_front, camera_up, polygonal_mode
     global inc_fov, inc_near, inc_far, inc_view_up
     camera_speed = 0.2
