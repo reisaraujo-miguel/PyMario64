@@ -13,14 +13,20 @@ textures_coord_list: list = []
 
 def read_obj(path: str) -> list:
     # Loads a Wavefront OBJ file and returns a list fo dictionaries
+    global vertices_list
+    global textures_coord_list
+
+    mtl: dict | None = None
     vertices: list = []
     texture_coords: list = []
-    faces: list = []
-    mtl: dict | None = None
+    new_object: bool = False
 
     material: str = ""
-    obj_list: list = []
-    obj_name: str = ""
+    model_list: list = []
+    material_start_list: list = []
+    material_size_list: list = []  # amount of vertices with this material
+    material_texture_list: list = []
+    material_name_list: list = []
 
     abs_path: Path = util.get_path(path)
 
@@ -33,26 +39,28 @@ def read_obj(path: str) -> list:
         match values[0]:
             case "mtllib":
                 mtl_path: Path = abs_path.parent / values[1]
-                print(f"mtl_path = {mtl_path}")
                 mtl = read_mtl(mtl_path)
 
             case "o":  # reading an object inside the obj file
-                if len(faces) > 0:
-                    # after we read all the object data, we use this data to
-                    # generate the object dict we will use to draw the object
-                    print(20 * "#", obj_name, 20 * "#")
-                    obj_list.append(
-                        load_obj(
-                            vertices,
-                            texture_coords,
-                            faces,
+                if new_object:
+                    material_size_list.append(
+                        (len(vertices_list) - material_start_list[-1])
+                    )
+
+                    model_list.append(
+                        create_model(
+                            material_start_list,
+                            material_size_list,
+                            material_texture_list,
+                            material_name_list,
                             mtl,
                         )
                     )
-                    faces = []
 
-                obj_name = values[1]
-                print(f"new obj: {obj_name}")
+                material_start_list: list = []
+                material_size_list: list = []
+                material_texture_list: list = []
+                material_name_list: list = []
 
             case "v":
                 vertices.append(values[1:4])
@@ -61,90 +69,68 @@ def read_obj(path: str) -> list:
                 texture_coords.append(values[1:3])
 
             case "usemtl" | "usemat":
-                material = values[1]  # get material name
+                if len(material_start_list) > 0:
+                    # if this is not the first material we are reading,
+                    # we need to save the size of the previous material
+                    # before proceeding
+                    material_size_list.append(
+                        (len(vertices_list) - material_start_list[-1])
+                    )
+
+                material = values[1]
+
+                material_start_list.append(len(vertices_list))
+
+                if mtl is not None:
+                    material_texture_list.append(mtl[material])
+                else:
+                    material_texture_list.append(None)
+
+                material_name_list.append(material)
 
             case "f":
-                face_vertices = []
-                face_texture_coords = []
+                for face_vertice in values[1:]:
+                    vertice_data = face_vertice.split("/")
+                    vertices_list.append(vertices[int(vertice_data[0]) - 1])
 
-                for vertice in values[1:]:
-                    face_data = vertice.split("/")
-                    face_vertices.append(int(face_data[0]))
+                    if len(vertice_data) >= 2 and len(vertice_data[1]) > 0:
+                        textures_coord_list.append(
+                            texture_coords[int(vertice_data[1]) - 1]
+                        )
 
-                    if len(face_data) >= 2 and len(face_data[1]) > 0:
-                        face_texture_coords.append(int(face_data[1]))
                     else:
-                        face_texture_coords.append(0)
+                        textures_coord_list.append(0)
 
-                faces.append((face_vertices, face_texture_coords, material))
+                new_object = True
 
-    print(20 * "%", obj_name, 20 * "%")
-    obj_list.append(
-        load_obj(
-            vertices,
-            texture_coords,
-            faces,
+    material_size_list.append((len(vertices_list) - material_start_list[-1]))
+
+    model_list.append(
+        create_model(
+            material_start_list,
+            material_size_list,
+            material_texture_list,
+            material_name_list,
             mtl,
         )
     )
 
-    return obj_list
+    return model_list
 
 
-def load_obj(
-    vertices: list, texture_coords: list, faces: list, mtl: dict | None
-) -> dict:
-    global vertices_list
-    global textures_coord_list
-
-    face_start_list: list = []
-    face_size_list: list = []  # amount of vertices in a face
-    face_texture_list: list = []
-    face_name_list: list = []
-    faces_visited: list = []
-
-    for face in faces:
-        if face[2] not in faces_visited:
-            if len(face_start_list) > 0:
-                face_size_list.append(
-                    (len(vertices_list) - face_start_list[-1])
-                )
-                print(
-                    faces_visited[-1],
-                    "face size:",
-                    face_size_list[-1],
-                    "\n",
-                )
-
-            print(face[2], "vertice inicial:", len(vertices_list))
-            face_start_list.append(len(vertices_list))
-
-            if mtl is not None:
-                face_texture_list.append(mtl[face[2]])
-                print(f"appended {mtl[face[2]]} to face_texture")
-            else:
-                face_texture_list.append(None)
-                print("appended 'None' to face_texture")
-
-            faces_visited.append(face[2])
-            face_name_list.append(face[2])
-
-        for vertice_id in face[0]:
-            vertices_list.append(vertices[vertice_id - 1])
-
-        for texture_id in face[1]:
-            textures_coord_list.append(texture_coords[texture_id - 1])
-
-    if len(face_start_list) > 0:
-        face_size_list.append(len(vertices_list) - face_start_list[-1])
-        print(faces_visited[-1], "face size:", face_size_list[-1], "\n")
-
+def create_model(
+    material_start_list,
+    material_size_list,
+    material_texture_list,
+    material_name_list,
+    mtl,
+):
     model_dict = {
-        "face_start": face_start_list,
-        "face_size": face_size_list,
-        "face_texture": face_texture_list,
-        "face_name": face_name_list,
-        "model_size": len(faces_visited),
+        "material_start": material_start_list,
+        "material_size": material_size_list,
+        "material_texture": material_texture_list,
+        "material_name": material_name_list,
+        "model_size": len(material_name_list),
         "mtl_dict": mtl,
     }
 
@@ -173,17 +159,10 @@ def read_mtl(path: str | Path) -> dict | None:
 
         elif values[0] == "newmtl":
             mtl_material_name = values[1]
-            print(f"new material name: {mtl_material_name}")
 
         elif values[0] == "map_Kd":
             mtl_filename = values[1]
             mtl_material_id: int = read_texture(abs_path.parent / mtl_filename)
-
-            print(
-                f"name: {mtl_material_name}, file: {mtl_filename}, "
-                f"id: {mtl_material_id}\n"
-            )
-
             mtl[mtl_material_name] = mtl_material_id
 
     if mtl:
@@ -201,8 +180,6 @@ def read_texture(path: str | Path) -> int:
         abs_path = path
 
     gl.glBindTexture(gl.GL_TEXTURE_2D, texture_id)
-
-    print(f"file {abs_path} bind to id {texture_id}")
 
     gl.glTexParameteri(
         gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE

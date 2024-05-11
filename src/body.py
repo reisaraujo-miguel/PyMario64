@@ -18,7 +18,6 @@ class Body:
             self.model_list.append(obj)
 
     def draw(self, program: None):
-        print("#" * 20, "drawing", "#" * 20)
         loc_model = gl.glGetUniformLocation(program, "model")
 
         gl.glUniformMatrix4fv(
@@ -27,20 +26,15 @@ class Body:
 
         for model in self.model_list:
             for i in range(model["model_size"]):
-                if model["face_texture"][i] is not None:
+                if model["material_texture"][i] is not None:
                     gl.glBindTexture(
-                        gl.GL_TEXTURE_2D, model["face_texture"][i]
+                        gl.GL_TEXTURE_2D, model["material_texture"][i]
                     )
-                    print(f"texture id: {model["face_texture"][i]} "
-                          f"texture name: {model["face_name"][i]}")
-
-                print(f"start: {model["face_start"][i]}, "
-                      f"size: {model["face_size"][i]}\n")
 
                 gl.glDrawArrays(
                     gl.GL_TRIANGLES,
-                    model["face_start"][i],
-                    model["face_size"][i],
+                    model["material_start"][i],
+                    model["material_size"][i],
                 )
 
     def scale(self, x: float, y: float, z: float):
