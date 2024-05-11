@@ -12,7 +12,6 @@ import glm
 import numpy as np
 import OpenGL.GL as gl
 
-# import input_handler as inpt
 import models
 import setup
 from body import Body
@@ -24,15 +23,16 @@ window = setup.create_window(height, width)
 vertex, fragment, program = setup.init_shaders()
 textures = setup.init_textures(100)
 
-monstro = Body()
-monstro.add_model("../assets/monstro/monstro.obj")
+mario = Body()
+mario.add_model("../assets/mario/mario64.obj")
+mario.scale(0.1, 0.1, 0.1)
 
 models.upload_vertices(program)
 models.upload_textures(program)
 
-BG_RED = 1.0
-BG_BLUE = 1.0
-BG_GREEN = 1.0
+BG_RED = 0.5
+BG_BLUE = 0.5
+BG_GREEN = 0.5
 BG_ALPHA = 1.0
 
 angle = 0.0
@@ -44,9 +44,9 @@ speed_factor = 0.05
 delta_time = 0.0
 last_frame = glfw.get_time()
 
-camera_pos = glm.vec3(0.0, 0.0, 1.0)
-camera_front = glm.vec3(0.0, 0.0, -1.0)
-camera_up = glm.vec3(0.0, 1.0, 0.0)
+camera_pos = glm.vec3(0.0, 0.0, 50.0)
+camera_front = glm.vec3(0.0, 0.0, -50.0)
+camera_up = glm.vec3(0.0, 50.0, 0.0)
 
 inc_fov = 0
 inc_near = 0
@@ -120,6 +120,9 @@ lastY = height / 2
 
 def mouse_event(window, xpos, ypos):
     global first_mouse, camera_front, yaw, pitch, lastX, lastY
+
+    xpos, ypos = glfw.get_cursor_pos(window)
+
     if first_mouse:
         lastX = xpos
         lastY = ypos
@@ -185,7 +188,7 @@ while not glfw.window_should_close(window):
     # ship.draw(program)
     # box.draw(program)
 
-    monstro.draw(program)
+    mario.draw(program)
 
     mat_view = view()
     loc_view = gl.glGetUniformLocation(program, "view")
@@ -197,5 +200,6 @@ while not glfw.window_should_close(window):
 
     glfw.poll_events()
     glfw.swap_buffers(window)
+
 
 glfw.terminate()

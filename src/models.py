@@ -1,22 +1,28 @@
+from pathlib import Path
+
 import numpy as np
 import OpenGL.GL as gl
 from PIL import Image
 
 import util
 
-texture_id = 0
-vertices_list = []
-textures_coord_list = []
+texture_id: int = 0
+vertices_list: list = []
+textures_coord_list: list = []
 
 
-def read_obj(path: str) -> dict:
-    """Loads a Wavefront OBJ file."""
-    vertices = []
-    texture_coords = []
-    faces = []
-    material = ""
+def read_obj(path: str) -> list:
+    # Loads a Wavefront OBJ file and returns a list fo dictionaries
+    vertices: list = []
+    texture_coords: list = []
+    faces: list = []
+    mtl: dict | None = None
 
-    abs_path = util.get_path(path)
+    material: str = ""
+    obj_list: list = []
+    obj_name: str = ""
+
+    abs_path: Path = util.get_path(path)
 
     for line in open(abs_path, "r"):
         values = line.split()
@@ -25,6 +31,29 @@ def read_obj(path: str) -> dict:
             continue  # ignore comments and blank lines
 
         match values[0]:
+            case "mtllib":
+                mtl_path: Path = abs_path.parent / values[1]
+                print(f"mtl_path = {mtl_path}")
+                mtl = read_mtl(mtl_path)
+
+            case "o":  # reading an object inside the obj file
+                if len(faces) > 0:
+                    # after we read all the object data, we use this data to
+                    # generate the object dict we will use to draw the object
+                    print(20 * "#", obj_name, 20 * "#")
+                    obj_list.append(
+                        load_obj(
+                            vertices,
+                            texture_coords,
+                            faces,
+                            mtl,
+                        )
+                    )
+                    faces = []
+
+                obj_name = values[1]
+                print(f"new obj: {obj_name}")
+
             case "v":
                 vertices.append(values[1:4])
 
@@ -32,61 +61,155 @@ def read_obj(path: str) -> dict:
                 texture_coords.append(values[1:3])
 
             case "usemtl" | "usemat":
-                material = values[1]
+                material = values[1]  # get material name
 
             case "f":
-                face = []
-                face_texture = []
+                face_vertices = []
+                face_texture_coords = []
 
-                for v in values[1:]:
-                    w = v.split("/")
-                    face.append(int(w[0]))
+                for vertice in values[1:]:
+                    face_data = vertice.split("/")
+                    face_vertices.append(int(face_data[0]))
 
-                    if len(w) >= 2 and len(w[1]) > 0:
-                        face_texture.append(int(w[1]))
+                    if len(face_data) >= 2 and len(face_data[1]) > 0:
+                        face_texture_coords.append(int(face_data[1]))
                     else:
-                        face_texture.append(0)
+                        face_texture_coords.append(0)
 
-                faces.append((face, face_texture, material))
+                faces.append((face_vertices, face_texture_coords, material))
 
-    obj_file = {
-        "vertices": vertices,
-        "texture": texture_coords,
-        "faces": faces,
+    print(20 * "%", obj_name, 20 * "%")
+    obj_list.append(
+        load_obj(
+            vertices,
+            texture_coords,
+            faces,
+            mtl,
+        )
+    )
+
+    return obj_list
+
+
+def load_obj(
+    vertices: list, texture_coords: list, faces: list, mtl: dict | None
+) -> dict:
+    global vertices_list
+    global textures_coord_list
+
+    face_start_list: list = []
+    face_size_list: list = []  # amount of vertices in a face
+    face_texture_list: list = []
+    face_name_list: list = []
+    faces_visited: list = []
+
+    for face in faces:
+        if face[2] not in faces_visited:
+            if len(face_start_list) > 0:
+                face_size_list.append(
+                    (len(vertices_list) - face_start_list[-1])
+                )
+                print(
+                    faces_visited[-1],
+                    "face size:",
+                    face_size_list[-1],
+                    "\n",
+                )
+
+            print(face[2], "vertice inicial:", len(vertices_list))
+            face_start_list.append(len(vertices_list))
+
+            if mtl is not None:
+                face_texture_list.append(mtl[face[2]])
+                print(f"appended {mtl[face[2]]} to face_texture")
+            else:
+                face_texture_list.append(None)
+                print("appended 'None' to face_texture")
+
+            faces_visited.append(face[2])
+            face_name_list.append(face[2])
+
+        for vertice_id in face[0]:
+            vertices_list.append(vertices[vertice_id - 1])
+
+        for texture_id in face[1]:
+            textures_coord_list.append(texture_coords[texture_id - 1])
+
+    if len(face_start_list) > 0:
+        face_size_list.append(len(vertices_list) - face_start_list[-1])
+        print(faces_visited[-1], "face size:", face_size_list[-1], "\n")
+
+    model_dict = {
+        "face_start": face_start_list,
+        "face_size": face_size_list,
+        "face_texture": face_texture_list,
+        "face_name": face_name_list,
+        "model_size": len(faces_visited),
+        "mtl_dict": mtl,
     }
 
-    return obj_file
+    return model_dict
 
 
-def read_mtl(path: str) -> dict:
+def read_mtl(path: str | Path) -> dict | None:
     global texture_id
 
-    abs_path = util.get_path(path)
+    if isinstance(path, str):
+        abs_path = util.get_path(path)
+    else:
+        abs_path = path
 
+    mtl: dict = {}
+
+    mtl_material_name: str = ""
+    mtl_filename: str = ""
+
+    print(f"reading mtl: {abs_path}\n")
     for line in open(abs_path, "r"):
         values = line.split()
 
         if line.startswith("#") or not values:
             continue  # ignore comments and blank lines
 
-        match values[0]:
-            case "newmtl":
-                pass
+        elif values[0] == "newmtl":
+            mtl_material_name = values[1]
+            print(f"new material name: {mtl_material_name}")
 
-    a = {}
+        elif values[0] == "map_Kd":
+            mtl_filename = values[1]
+            mtl_material_id: int = read_texture(abs_path.parent / mtl_filename)
 
-    return a
+            print(
+                f"name: {mtl_material_name}, file: {mtl_filename}, "
+                f"id: {mtl_material_id}\n"
+            )
+
+            mtl[mtl_material_name] = mtl_material_id
+
+    if mtl:
+        return mtl
+    else:
+        return None
 
 
-def read_texture(path: str) -> int:
+def read_texture(path: str | Path) -> int:
     global texture_id
 
-    abs_path = util.get_path(path)
+    if isinstance(path, str):
+        abs_path = util.get_path(path)
+    else:
+        abs_path = path
 
     gl.glBindTexture(gl.GL_TEXTURE_2D, texture_id)
 
-    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT)
-    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT)
+    print(f"file {abs_path} bind to id {texture_id}")
+
+    gl.glTexParameteri(
+        gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE
+    )
+    gl.glTexParameteri(
+        gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE
+    )
 
     gl.glTexParameteri(
         gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR
@@ -117,36 +240,6 @@ def read_texture(path: str) -> int:
     texture_id += 1
 
     return texture_id - 1
-
-
-def load_model(model: dict) -> dict:
-    global vertices_list
-    global textures_coord_list
-
-    face_start_list: list = []
-    face_size_list: list = []  # amount of vertices in a face
-    face_texture_list: list = []
-
-    for face in model["faces"]:
-        print(face[2], " vertice inicial =", len(vertices_list))
-        face_start_list.append(len(vertices_list))
-        face_texture_list.append(face[2])
-
-        for vertice_id in face[0]:
-            vertices_list.append(model["vertices"][vertice_id - 1])
-
-        for texture_id in face[1]:
-            textures_coord_list.append(model["texture"][texture_id - 1])
-
-        face_size_list.append(len(vertices_list))
-
-    model_dict = {
-        "face_start": face_start_list,
-        "face_size": face_size_list,
-        "face_texture": face_texture_list,
-    }
-
-    return model_dict
 
 
 def upload_vertices(program: None):
