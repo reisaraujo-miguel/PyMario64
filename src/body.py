@@ -37,11 +37,11 @@ class Body:
                     model["material_size"][i],
                 )
 
-    def scale(self, x: float, y: float, z: float):
-        self.transform = glm.scale(self.transform, glm.vec3(x, y, z))
+    def scale(self, axis: glm.vec3):
+        self.transform = glm.scale(self.transform, axis)
 
-    def rotate(self, angle: float, x: float, y: float, z: float):
-        self.transform = glm.rotate(self.transform, angle, glm.vec3(x, y, z))
+    def rotate(self, angle: float, axis: glm.vec3):
+        self.transform = glm.rotate(self.transform, angle, axis)
 
-    def translate(self, x: float, y: float, z: float):
-        self.transform = glm.translate(self.transform, glm.vec3(x, y, z))
+    def translate(self, axis: glm.vec3):
+        self.transform = glm.translate(self.transform, axis)

@@ -5,158 +5,57 @@ if os.environ["XDG_SESSION_TYPE"] == "wayland":
     os.environ["XDG_SESSION_TYPE"] = "x11"
 
 
-import math
-
 import glfw
 import glm
 import numpy as np
 import OpenGL.GL as gl
 
+import camera
+import input
 import models
 import setup
 from body import Body
 
-height = 600
-width = 600
+height: float = 600
+width: float = 600
 
-window = setup.create_window(height, width)
+window: glfw._GLFWwindow = setup.create_window(height, width)
 vertex, fragment, program = setup.init_shaders()
-textures = setup.init_textures(100)
+textures: None = setup.init_textures(100)
 
-mario = Body()
+mario: Body = Body()
 mario.add_model("../assets/mario/mario64.obj")
-mario.scale(0.1, 0.1, 0.1)
+mario.scale(glm.vec3(0.05, 0.05, 0.05))
 
 models.upload_vertices(program)
 models.upload_textures(program)
 
-BG_RED = 0.5
-BG_BLUE = 0.5
-BG_GREEN = 0.5
-BG_ALPHA = 1.0
+BG_RED: float = 0.5
+BG_BLUE: float = 0.5
+BG_GREEN: float = 0.5
+BG_ALPHA: float = 1.0
 
-angle = 0.0
-s_x, s_y = 1.0, 1.0
-t_x, t_y = 0.0, 0.0
-speed = 0.0
-size_factor = 0.05
-speed_factor = 0.05
-delta_time = 0.0
-last_frame = glfw.get_time()
+angle: float = 0.0
+translation: glm.vec3 = glm.vec3(0.0, 0.0, 0.0)
+camera_speed: float = 0.4
+delta_time: float = 0.0
+last_frame: float = glfw.get_time()
 
-camera_pos = glm.vec3(0.0, 0.0, 50.0)
-camera_front = glm.vec3(0.0, 0.0, -50.0)
-camera_up = glm.vec3(0.0, 50.0, 0.0)
+camera_pos: glm.vec3 = glm.vec3(0.0, 0.0, 50.0)
+camera_front: glm.vec3 = glm.vec3(0.0, 0.0, -50.0)
+camera_up: glm.vec3 = glm.vec3(0.0, 50.0, 0.0)
+mouse_sensitivity: float = 0.2
 
-inc_fov = 0
-inc_near = 0
-inc_far = 0
-inc_view_up = 0
+mat_projection: glm.mat4x4 = glm.mat4x4()
+mat_view: glm.mat4x4 = glm.mat4x4()
 
-
-def view():
-    global camera_pos, camera_front, camera_up
-    mat_view = glm.lookAt(camera_pos, camera_pos + camera_front, camera_up)
-    mat_view = np.array(mat_view)
-    return mat_view
-
-
-def projection():
-    global height, width, inc_fov, inc_near, inc_far
-    # perspective parameters: fovy, aspect, near, far
-    mat_projection = glm.perspective(
-        glm.radians(45.0), width / height, 0.1, 1000.0
-    )
-    mat_projection = np.array(mat_projection)
-    return mat_projection
-
-
-polygonal_mode = False
-
-
-def key_event(window, key, scancode, action, mods):
-    global camera_pos, camera_front, camera_up, polygonal_mode
-    global inc_fov, inc_near, inc_far, inc_view_up
-    camera_speed = 0.2
-
-    if key == 66:
-        inc_view_up += 0.1
-
-    if key == 78:
-        inc_near += 0.1
-
-    if key == 77:
-        inc_far -= 5
-
-    if key == 87 and (action == 1 or action == 2):  # tecla W
-        camera_pos += camera_speed * camera_front
-
-    if key == 83 and (action == 1 or action == 2):  # tecla S
-        camera_pos -= camera_speed * camera_front
-
-    if key == 65 and (action == 1 or action == 2):  # tecla A
-        camera_pos -= (
-            glm.normalize(glm.cross(camera_front, camera_up)) * camera_speed
-        )
-
-    if key == 68 and (action == 1 or action == 2):  # tecla D
-        camera_pos += (
-            glm.normalize(glm.cross(camera_front, camera_up)) * camera_speed
-        )
-
-    if key == 80 and action == 1 and polygonal_mode is True:
-        polygonal_mode = False
-    else:
-        if key == 80 and action == 1 and polygonal_mode is False:
-            polygonal_mode = True
-
-
-first_mouse = True
-yaw = -90.0
-pitch = 0.0
-lastX = width / 2
-lastY = height / 2
-
-
-def mouse_event(window, xpos, ypos):
-    global first_mouse, camera_front, yaw, pitch, lastX, lastY
-
-    xpos, ypos = glfw.get_cursor_pos(window)
-
-    if first_mouse:
-        lastX = xpos
-        lastY = ypos
-        first_mouse = False
-
-    xoffset = xpos - lastX
-    yoffset = lastY - ypos
-    lastX = xpos
-    lastY = ypos
-
-    sensitivity = 0.3
-    xoffset *= sensitivity
-    yoffset *= sensitivity
-
-    yaw += xoffset
-    pitch += yoffset
-
-    if pitch >= 90.0:
-        pitch = 90.0
-    if pitch <= -90.0:
-        pitch = -90.0
-
-    front = glm.vec3()
-    front.x = math.cos(glm.radians(yaw)) * math.cos(glm.radians(pitch))
-    front.y = math.sin(glm.radians(pitch))
-    front.z = math.sin(glm.radians(yaw)) * math.cos(glm.radians(pitch))
-    camera_front = glm.normalize(front)
-
-
-glfw.set_key_callback(window, key_event)
-glfw.set_cursor_pos_callback(window, mouse_event)
+yaw: float = -90.0
+pitch: float = 0.0
+last_x: float = width / 2
+last_y: float = height / 2
 
 glfw.show_window(window)
-glfw.set_cursor_pos(window, lastX, lastY)
+glfw.set_cursor_pos(window, last_x, last_y)
 
 gl.glEnable(gl.GL_DEPTH_TEST)
 
@@ -169,34 +68,29 @@ while not glfw.window_should_close(window):
     gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
     gl.glClearColor(BG_RED, BG_GREEN, BG_BLUE, BG_ALPHA)
 
-    if polygonal_mode is True:
-        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)
-    if polygonal_mode is False:
-        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
+    camera_pos = input.move_camera_pos(
+        window, camera_pos, camera_front, camera_up, camera_speed
+    )
 
-    # s_x, s_y = inpt.check_scale(window, s_x, s_y, size_factor * delta_time)
-    # ship.resize(s_x, s_y)
+    camera_front, last_x, last_y, yaw, pitch = input.move_camera_view(
+        window, last_x, last_y, yaw, pitch, mouse_sensitivity
+    )
 
-    # angle = inpt.check_rotation(window, t_x, t_y)
-    # ship.rotate(angle)
+    input.check_polygonal_mode(window)
 
-    # speed = inpt.check_movement(window, speed, speed_factor)
-    # t_x, t_y = ship.move_towards_mouse(window, t_x, t_y, speed * delta_time)
-    # t_x, t_y = ship.screen_wrap(t_x, t_y)
-    # ship.translate(t_x, t_y)
+    mat_view = camera.view(camera_pos, camera_front, camera_up)
 
-    # ship.draw(program)
-    # box.draw(program)
+    loc_view = gl.glGetUniformLocation(program, "view")
+    gl.glUniformMatrix4fv(loc_view, 1, gl.GL_TRUE, np.array(mat_view))
+
+    mat_projection = camera.projection(mat_projection, height, width)
+
+    loc_projection = gl.glGetUniformLocation(program, "projection")
+    gl.glUniformMatrix4fv(
+        loc_projection, 1, gl.GL_TRUE, np.array(mat_projection)
+    )
 
     mario.draw(program)
-
-    mat_view = view()
-    loc_view = gl.glGetUniformLocation(program, "view")
-    gl.glUniformMatrix4fv(loc_view, 1, gl.GL_TRUE, mat_view)
-
-    mat_projection = projection()
-    loc_projection = gl.glGetUniformLocation(program, "projection")
-    gl.glUniformMatrix4fv(loc_projection, 1, gl.GL_TRUE, mat_projection)
 
     glfw.poll_events()
     glfw.swap_buffers(window)
