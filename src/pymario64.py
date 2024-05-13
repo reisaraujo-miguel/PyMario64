@@ -102,7 +102,7 @@ while not glfw.window_should_close(window):
         loc_projection, 1, gl.GL_TRUE, np.array(mat_projection)
     )
 
-    main_scene.draw(program, 1)
+    main_scene.draw(program)
 
     glfw.poll_events()
     glfw.swap_buffers(window)

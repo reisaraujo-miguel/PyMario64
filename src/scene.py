@@ -144,7 +144,7 @@ class Scene:
             loc_texture_coord, 2, gl.GL_FLOAT, False, stride, offset
         )
 
-    def draw(self, program: None, i):
+    def draw(self, program: None):
         """Draw every object in the scene."""
         loc_model = gl.glGetUniformLocation(program, "model")
 
