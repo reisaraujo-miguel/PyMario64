@@ -8,7 +8,7 @@ from object_3d import Object3D
 
 
 class Scene:
-    """Handles storing and drawing every object in the scene."""
+    """Handles storing and drawing objects."""
 
     def __init__(self, qt_textures: int) -> None:
         self.texture_coord_list: list = []
@@ -17,7 +17,7 @@ class Scene:
 
         self.vertices_list: list = []
 
-        self.object_list: list = []
+        self.object_list: list[Object3D] = []
 
         gl.glHint(gl.GL_LINE_SMOOTH_HINT, gl.GL_DONT_CARE)
         gl.glEnable(gl.GL_BLEND)
@@ -36,45 +36,32 @@ class Scene:
         """Add object to the list of scene objects."""
         self.object_list.append(obj)
 
-        for name, path in obj.model.texture_dict.items():
-            self.load_texture(path)
-            self.texture_dict[name] = self.last_texture_id
+        for name, path in obj.texture_dict.items():
+            if path is not None:
+                self.load_texture(path, obj.texture_wrap)
+                self.texture_dict[name] = self.last_texture_id
+            else:
+                self.texture_dict[name] = None
 
-        self.vertices_list += obj.model.mesh_vertice_list
-        self.texture_coord_list += obj.model.mesh_texture_coord_list
+        self.vertices_list += obj.mesh_vertice_list
+        self.texture_coord_list += obj.mesh_texture_coord_list
 
-    def draw(self, program: None):
-        for obj in self.object_list:
-            loc_model = gl.glGetUniformLocation(program, "model")
-
-            gl.glUniformMatrix4fv(
-                loc_model, 1, gl.GL_TRUE, np.array(obj.transform)
-            )
-
-            for mesh in obj.model.mesh_list:
-                for i in range(mesh["mesh_size"]):
-                    gl.glBindTexture(
-                        gl.GL_TEXTURE_2D, self.texture_dict[mesh["mt_name"][i]]
-                    )
-
-                    gl.glDrawArrays(
-                        gl.GL_TRIANGLES,
-                        mesh["mt_start"][i],
-                        mesh["mt_size"][i],
-                    )
-
-    def load_texture(self, path: Path):
+    def load_texture(self, path: Path, texture_wrap: int):
         """Read an image file and create a texture."""
         self.last_texture_id += 1
 
+        wrap_mode = None
+
+        match texture_wrap:
+            case 0:
+                wrap_mode = gl.GL_CLAMP_TO_EDGE
+            case 1:
+                wrap_mode = gl.GL_REPEAT
+
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.last_texture_id)
 
-        gl.glTexParameteri(
-            gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE
-        )
-        gl.glTexParameteri(
-            gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE
-        )
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, wrap_mode)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, wrap_mode)
 
         gl.glTexParameteri(
             gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR
@@ -156,3 +143,30 @@ class Scene:
         gl.glVertexAttribPointer(
             loc_texture_coord, 2, gl.GL_FLOAT, False, stride, offset
         )
+
+    def draw(self, program: None, i):
+        """Draw every object in the scene."""
+        loc_model = gl.glGetUniformLocation(program, "model")
+
+        vertice_offset = 0
+
+        for obj in self.object_list:
+            gl.glUniformMatrix4fv(
+                loc_model, 1, gl.GL_TRUE, np.array(obj.transform)
+            )
+
+            for mesh in obj.mesh_list:
+                for i in range(mesh["mesh_size"]):
+                    if self.texture_dict[mesh["mt_name"][i]] is not None:
+                        gl.glBindTexture(
+                            gl.GL_TEXTURE_2D,
+                            self.texture_dict[mesh["mt_name"][i]],
+                        )
+
+                    gl.glDrawArrays(
+                        gl.GL_TRIANGLES,
+                        mesh["mt_start"][i] + vertice_offset,
+                        mesh["mt_size"][i],
+                    )
+
+            vertice_offset += obj.model_size

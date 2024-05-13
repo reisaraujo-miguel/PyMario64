@@ -84,3 +84,21 @@ def check_polygonal_mode(window: glfw._GLFWwindow) -> None:
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)
     if polygonal_mode is False:
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
+
+
+def window_focus_callback(window: glfw._GLFWwindow, focused: bool):
+    if focused:
+        glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
+
+
+def window_lost_focus(
+    window: glfw._GLFWwindow,
+) -> bool:
+    if glfw.get_key(window, glfw.KEY_ESCAPE) == glfw.PRESS:
+        glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_NORMAL)
+        return True
+
+    elif glfw.get_mouse_button(window, glfw.MOUSE_BUTTON_LEFT) == glfw.PRESS:
+        glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
+
+    return False

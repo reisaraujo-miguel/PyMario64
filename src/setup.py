@@ -7,7 +7,9 @@ import shaders
 def create_window(height: int, width: int) -> glfw._GLFWwindow:
     """Initialise a hidden window and make it the current context."""
     glfw.init()
+    glfw.window_hint(glfw.FOCUSED, glfw.FALSE)
     glfw.window_hint(glfw.VISIBLE, glfw.FALSE)
+    glfw.window_hint(glfw.FOCUS_ON_SHOW, glfw.TRUE)
     window: glfw._GLFWwindow = glfw.create_window(
         height, width, "PyMario64", None, None
     )

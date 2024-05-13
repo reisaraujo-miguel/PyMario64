@@ -4,14 +4,17 @@ import util
 
 
 class Model3D:
-    """An Object that stores a 3D mesh"""
+    """An Object that stores one or more 3D meshes"""
 
-    def __init__(self, model_path: str) -> None:
+    def __init__(self, model_path: str, texture_wrap: int = 0) -> None:
         self.mesh_vertice_list: list = []
         self.mesh_texture_coord_list: list = []
+        self.model_size: int = 0
         self.texture_dict: dict = {}
         self.mesh_list: list = []
         self.mtl: dict | None = None
+
+        self.texture_wrap: int = texture_wrap
 
         self.load_model(model_path)
 
@@ -91,7 +94,7 @@ class Model3D:
                                 ]
                             )
                         else:
-                            self.mesh_texture_coord_list.append(0)
+                            self.mesh_texture_coord_list.append(["0.0", "0.0"])
 
         mt_size_list.append((len(self.mesh_vertice_list) - mt_start_list[-1]))
 
@@ -102,6 +105,8 @@ class Model3D:
                 mt_name_list,
             )
         )
+
+        self.model_size = len(self.mesh_vertice_list)
 
     def create_mesh(
         self,
@@ -129,6 +134,7 @@ class Model3D:
         filename: str = ""
         texture_name: str = ""
 
+        is_prev_mapped: bool = True
         for line in open(abs_path, "r"):
             values = line.split()
 
@@ -136,8 +142,13 @@ class Model3D:
                 continue  # ignore comments and blank lines
 
             elif values[0] == "newmtl":
+                if not is_prev_mapped:
+                    self.texture_dict[texture_name] = None
+
                 texture_name = values[1]
+                is_prev_mapped = False
 
             elif values[0] == "map_Kd":
                 filename = values[1]
                 self.texture_dict[texture_name] = abs_path.parent / filename
+                is_prev_mapped = True

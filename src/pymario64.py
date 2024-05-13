@@ -24,12 +24,18 @@ vertex, fragment, program = setup.init_shaders(
     "./shaders/vertex.glsl", "./shaders/fragment.glsl"
 )
 
-main_scene: Scene = Scene(100)
+main_scene: Scene = Scene(200)
 
-mario: Object3D = Object3D("../assets/mario/mario64.obj")
-mario.scale(glm.vec3(0.05, 0.05, 0.05))
+world: Object3D = Object3D("../assets/world/world.obj", 1)
+world.translate(glm.vec3(0, -6, 0))
+world.scale(glm.vec3(10.0, 10.0, 10.0))
+main_scene.add_object_to_scene(world)
 
+mario: Object3D = Object3D("../assets/mario/mario64.obj", 0)
+mario.scale(glm.vec3(0.01, 0.01, 0.01))
+mario.translate(glm.vec3(0, -210, 0))
 main_scene.add_object_to_scene(mario)
+
 main_scene.load_scene(program)
 
 BG_RED: float = 0.5
@@ -42,7 +48,7 @@ translation: glm.vec3 = glm.vec3(0.0, 0.0, 0.0)
 delta_time: float = 0.0
 last_frame: float = glfw.get_time()
 
-camera_speed: float = 0.4
+camera_speed: float = 0.2
 camera_pos: glm.vec3 = glm.vec3(0.0, 0.0, 50.0)
 camera_front: glm.vec3 = glm.vec3(0.0, 0.0, -50.0)
 camera_up: glm.vec3 = glm.vec3(0.0, 50.0, 0.0)
@@ -53,8 +59,9 @@ mat_view: glm.mat4x4 = glm.mat4x4()
 
 yaw: float = -90.0
 pitch: float = 0.0
-last_x: float = width / 2
-last_y: float = height / 2
+last_x, last_y = glfw.get_cursor_pos(window)
+
+glfw.set_window_focus_callback(window, input.window_focus_callback)
 
 glfw.show_window(window)
 glfw.set_cursor_pos(window, last_x, last_y)
@@ -69,6 +76,9 @@ while not glfw.window_should_close(window):
     gl.glClear(gl.GL_COLOR_BUFFER_BIT)
     gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
     gl.glClearColor(BG_RED, BG_GREEN, BG_BLUE, BG_ALPHA)
+
+    if input.window_lost_focus(window):
+        last_x, last_y = glfw.get_cursor_pos(window)
 
     camera_pos = input.move_camera_pos(
         window, camera_pos, camera_front, camera_up, camera_speed
@@ -92,7 +102,7 @@ while not glfw.window_should_close(window):
         loc_projection, 1, gl.GL_TRUE, np.array(mat_projection)
     )
 
-    main_scene.draw(program)
+    main_scene.draw(program, 1)
 
     glfw.poll_events()
     glfw.swap_buffers(window)
