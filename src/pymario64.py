@@ -12,23 +12,25 @@ import OpenGL.GL as gl
 
 import camera
 import input
-import models
 import setup
-from body import Body
+from object_3d import Object3D
+from scene import Scene
 
 height: float = 600
 width: float = 600
 
 window: glfw._GLFWwindow = setup.create_window(height, width)
-vertex, fragment, program = setup.init_shaders()
-textures: None = setup.init_textures(100)
+vertex, fragment, program = setup.init_shaders(
+    "./shaders/vertex.glsl", "./shaders/fragment.glsl"
+)
 
-mario: Body = Body()
-mario.add_model("../assets/mario/mario64.obj")
+main_scene: Scene = Scene(100)
+
+mario: Object3D = Object3D("../assets/mario/mario64.obj")
 mario.scale(glm.vec3(0.05, 0.05, 0.05))
 
-models.upload_vertices(program)
-models.upload_textures(program)
+main_scene.add_object_to_scene(mario)
+main_scene.load_scene(program)
 
 BG_RED: float = 0.5
 BG_BLUE: float = 0.5
@@ -37,10 +39,10 @@ BG_ALPHA: float = 1.0
 
 angle: float = 0.0
 translation: glm.vec3 = glm.vec3(0.0, 0.0, 0.0)
-camera_speed: float = 0.4
 delta_time: float = 0.0
 last_frame: float = glfw.get_time()
 
+camera_speed: float = 0.4
 camera_pos: glm.vec3 = glm.vec3(0.0, 0.0, 50.0)
 camera_front: glm.vec3 = glm.vec3(0.0, 0.0, -50.0)
 camera_up: glm.vec3 = glm.vec3(0.0, 50.0, 0.0)
@@ -78,22 +80,23 @@ while not glfw.window_should_close(window):
 
     input.check_polygonal_mode(window)
 
-    mat_view = camera.view(camera_pos, camera_front, camera_up)
+    mat_view = camera.get_view_mat(camera_pos, camera_front, camera_up)
 
     loc_view = gl.glGetUniformLocation(program, "view")
     gl.glUniformMatrix4fv(loc_view, 1, gl.GL_TRUE, np.array(mat_view))
 
-    mat_projection = camera.projection(mat_projection, height, width)
+    mat_projection = camera.get_projection_mat(mat_projection, height, width)
 
     loc_projection = gl.glGetUniformLocation(program, "projection")
     gl.glUniformMatrix4fv(
         loc_projection, 1, gl.GL_TRUE, np.array(mat_projection)
     )
 
-    mario.draw(program)
+    main_scene.draw(program)
 
     glfw.poll_events()
     glfw.swap_buffers(window)
+    # break
 
 
 glfw.terminate()

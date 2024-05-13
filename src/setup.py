@@ -5,6 +5,7 @@ import shaders
 
 
 def create_window(height: int, width: int) -> glfw._GLFWwindow:
+    """Initialise a hidden window and make it the current context."""
     glfw.init()
     glfw.window_hint(glfw.VISIBLE, glfw.FALSE)
     window: glfw._GLFWwindow = glfw.create_window(
@@ -16,10 +17,11 @@ def create_window(height: int, width: int) -> glfw._GLFWwindow:
     return window
 
 
-def init_shaders() -> tuple[None, None, None]:
-    vertex, fragment = shaders.get_shaders(
-        "./shaders/vertex.glsl", "./shaders/fragment.glsl"
-    )
+def init_shaders(
+    vertex_path: str, fragment_path: str
+) -> tuple[None, None, None]:
+    """Load and compile the shaders and link the program."""
+    vertex, fragment = shaders.get_shaders(vertex_path, fragment_path)
 
     shaders.compile_shader(vertex)
     shaders.compile_shader(fragment)
@@ -34,14 +36,3 @@ def init_shaders() -> tuple[None, None, None]:
     gl.glUseProgram(program)
 
     return vertex, fragment, program
-
-
-def init_textures(qt: int) -> None:
-    gl.glHint(gl.GL_LINE_SMOOTH_HINT, gl.GL_DONT_CARE)
-    gl.glEnable(gl.GL_BLEND)
-    gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
-    gl.glEnable(gl.GL_LINE_SMOOTH)
-    gl.glEnable(gl.GL_TEXTURE_2D)
-    textures = gl.glGenTextures(qt)
-
-    return textures

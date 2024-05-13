@@ -4,6 +4,7 @@ import util
 
 
 def get_shaders(vertex_file: str, fragment_file: str) -> tuple[None, None]:
+    """Create and source the shaders objects."""
     abs_vertex_path = util.get_path(vertex_file)
     abs_fragment_path = util.get_path(fragment_file)
 
@@ -32,6 +33,7 @@ def get_shaders(vertex_file: str, fragment_file: str) -> tuple[None, None]:
 
 
 def compile_shader(shader: None):
+    """Compile a shader object."""
     gl.glCompileShader(shader)
 
     if not gl.glGetShaderiv(shader, gl.GL_COMPILE_STATUS):
@@ -40,6 +42,7 @@ def compile_shader(shader: None):
 
 
 def link_program(program: None):
+    "Link a program."
     gl.glLinkProgram(program)
 
     if not gl.glGetProgramiv(program, gl.GL_LINK_STATUS):

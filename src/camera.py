@@ -3,7 +3,7 @@ import glm
 polygonal_mode: bool = False
 
 
-def view(
+def get_view_mat(
     camera_pos: glm.vec3, camera_front: glm.vec3, camera_up: glm.vec3
 ) -> glm.mat4x4:
     mat_view: glm.mat4x4 = glm.lookAt(
@@ -13,7 +13,7 @@ def view(
     return mat_view
 
 
-def projection(
+def get_projection_mat(
     mat_projection: glm.mat4x4,
     height: int,
     width: int,
