@@ -1,4 +1,5 @@
 import math
+from time import sleep
 
 import glfw
 import glm
@@ -51,10 +52,10 @@ def rotate_camera_view(
     y_offset: float = (last_y - y_pos) * sensitivity
 
     camera.yaw += x_offset
-    camera.yaw = (camera.yaw % 720) - 360
+    camera.yaw = (camera.yaw % 720.0) - 360.0
 
     camera.pitch += y_offset
-    camera.pitch = max(-85, min(camera.pitch, 85))
+    camera.pitch = max(-85.0, min(camera.pitch, 85.0))
 
     camera.front.x = math.cos(glm.radians(camera.yaw)) * math.cos(
         glm.radians(camera.pitch)
@@ -72,15 +73,16 @@ def rotate_camera_view(
 
 
 def check_polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
-    if glfw.get_key(window, glfw.KEY_P):
-        camera.toggle_polygonal_mode()
-
     polygonal_mode: bool = camera.polygonal_mode
 
     if polygonal_mode is True:
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)
     if polygonal_mode is False:
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
+
+    if glfw.get_key(window, glfw.KEY_P) == glfw.PRESS:
+        camera.toggle_polygonal_mode()
+        sleep(0.08)
 
 
 def window_lost_focus(

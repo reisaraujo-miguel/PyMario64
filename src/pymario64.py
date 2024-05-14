@@ -37,6 +37,12 @@ mario.scale(glm.vec3(0.01, 0.01, 0.01))
 mario.translate(glm.vec3(0, -210, 0))
 main_scene.add_object_to_scene(mario)
 
+peach: Object3D = Object3D("../assets/peach/peach.obj", 0)
+peach.scale(glm.vec3(0.01, 0.01, 0.01))
+peach.translate(glm.vec3(0, 260, 5900))
+peach.rotate(glm.radians(180), glm.vec3(0, 1, 0))
+main_scene.add_object_to_scene(peach)
+
 main_scene.load_scene(program)
 
 camera: Camera = Camera(window)

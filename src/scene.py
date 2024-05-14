@@ -162,6 +162,11 @@ class Scene:
                             gl.GL_TEXTURE_2D,
                             self.texture_dict[mesh["mt_name"][i]],
                         )
+                    else:
+                        gl.glBindTexture(
+                            gl.GL_TEXTURE_2D,
+                            0,
+                        )
 
                     gl.glDrawArrays(
                         gl.GL_TRIANGLES,
