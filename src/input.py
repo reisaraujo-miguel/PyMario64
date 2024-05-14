@@ -43,44 +43,47 @@ def rotate_camera_view(
     camera: Camera,
     last_x: float,
     last_y: float,
-    yaw: float,
-    pitch: float,
     sensitivity: float,
-) -> tuple[float, float, float, float]:
+) -> tuple[float, float]:
     x_pos, y_pos = glfw.get_cursor_pos(window)
 
     x_offset: float = (x_pos - last_x) * sensitivity
     y_offset: float = (last_y - y_pos) * sensitivity
 
-    yaw += x_offset
-    pitch += y_offset
+    camera.yaw += x_offset
 
-    if pitch >= 85.0:
-        pitch = 85.0
-    elif pitch <= -85.0:
-        pitch = -85.0
+    if camera.yaw >= 360.0:
+        camera.yaw = -360.0
+    elif camera.yaw <= -360.0:
+        camera.yaw = 360.0
 
-    if yaw >= 360.0:
-        yaw = -360.0
-    elif yaw < -360.0:
-        yaw = 360.0
+    camera.pitch += y_offset
 
-    camera.front.x = math.cos(glm.radians(yaw)) * math.cos(glm.radians(pitch))
-    camera.front.y = math.sin(glm.radians(pitch))
-    camera.front.z = math.sin(glm.radians(yaw)) * math.cos(glm.radians(pitch))
+    if camera.pitch >= 85.0:
+        camera.pitch = 85.0
+    elif camera.pitch <= -85.0:
+        camera.pitch = -85.0
+
+    camera.front.x = math.cos(glm.radians(camera.yaw)) * math.cos(
+        glm.radians(camera.pitch)
+    )
+    camera.front.y = math.sin(glm.radians(camera.pitch))
+    camera.front.z = math.sin(glm.radians(camera.yaw)) * math.cos(
+        glm.radians(camera.pitch)
+    )
     camera.front = glm.normalize(camera.front)
 
     last_x = x_pos
     last_y = y_pos
 
-    return last_x, last_y, yaw, pitch
+    return last_x, last_y
 
 
 def check_polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
     if glfw.get_key(window, glfw.KEY_P):
         camera.toggle_polygonal_mode()
 
-    polygonal_mode: bool = camera.get_polygonal_mode()
+    polygonal_mode: bool = camera.polygonal_mode
 
     if polygonal_mode is True:
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)

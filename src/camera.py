@@ -11,6 +11,9 @@ class Camera:
         self.front: glm.vec3 = glm.vec3()
         self.up: glm.vec3 = glm.vec3()
 
+        self.yaw: float = -90.0
+        self.pitch: float = 0.0
+
         self.mat_view: glm.mat4x4 = glm.mat4()
         self.mat_projection: glm.mat4x4 = glm.mat4()
 
@@ -44,24 +47,3 @@ class Camera:
 
     def toggle_polygonal_mode(self) -> None:
         self.polygonal_mode = not self.polygonal_mode
-
-    def get_polygonal_mode(self) -> bool:
-        return self.polygonal_mode
-
-    def set_pos(self, pos: glm.vec3):
-        self.pos = pos
-
-    def get_pos(self):
-        return self.pos
-
-    def set_front(self, front: glm.vec3):
-        self.front = front
-
-    def get_front(self):
-        return self.front
-
-    def set_up(self, up: glm.vec3):
-        self.up = up
-
-    def get_up(self):
-        return self.up
