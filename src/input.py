@@ -4,52 +4,49 @@ import glfw
 import glm
 import OpenGL.GL as gl
 
-import camera
+from camera import Camera
 
 
 def move_camera_pos(
     window: glfw._GLFWwindow,
-    camera_pos: glm.vec3,
-    camera_front: glm.vec3,
-    camera_up: glm.vec3,
+    camera: Camera,
     camera_speed: float,
-) -> glm.vec3:
+) -> None:
     if (
         glfw.get_key(window, glfw.KEY_UP) or glfw.get_key(window, glfw.KEY_W)
     ) == glfw.PRESS:
-        camera_pos += camera_speed * camera_front
+        camera.pos += camera_speed * camera.front
 
     elif (
         glfw.get_key(window, glfw.KEY_DOWN) or glfw.get_key(window, glfw.KEY_S)
     ) == glfw.PRESS:
-        camera_pos -= camera_speed * camera_front
+        camera.pos -= camera_speed * camera.front
 
     elif (
         glfw.get_key(window, glfw.KEY_LEFT) or glfw.get_key(window, glfw.KEY_A)
     ) == glfw.PRESS:
-        camera_pos -= (
-            glm.normalize(glm.cross(camera_front, camera_up)) * camera_speed
+        camera.pos -= (
+            glm.normalize(glm.cross(camera.front, camera.up)) * camera_speed
         )
 
     elif (
         glfw.get_key(window, glfw.KEY_RIGHT)
         or glfw.get_key(window, glfw.KEY_D)
     ) == glfw.PRESS:
-        camera_pos += (
-            glm.normalize(glm.cross(camera_front, camera_up)) * camera_speed
+        camera.pos += (
+            glm.normalize(glm.cross(camera.front, camera.up)) * camera_speed
         )
 
-    return camera_pos
 
-
-def move_camera_view(
+def rotate_camera_view(
     window: glfw._GLFWwindow,
+    camera: Camera,
     last_x: float,
     last_y: float,
     yaw: float,
     pitch: float,
     sensitivity: float,
-) -> tuple[glm.vec3, float, float, float, float]:
+) -> tuple[float, float, float, float]:
     x_pos, y_pos = glfw.get_cursor_pos(window)
 
     x_offset: float = (x_pos - last_x) * sensitivity
@@ -63,18 +60,18 @@ def move_camera_view(
     if pitch <= -90.0:
         pitch = -90.0
 
-    camera_front = glm.vec3()
-    camera_front.x = math.cos(glm.radians(yaw)) * math.cos(glm.radians(pitch))
-    camera_front.y = math.sin(glm.radians(pitch))
-    camera_front.z = math.sin(glm.radians(yaw)) * math.cos(glm.radians(pitch))
+    camera.front.x = math.cos(glm.radians(yaw)) * math.cos(glm.radians(pitch))
+    camera.front.y = math.sin(glm.radians(pitch))
+    camera.front.z = math.sin(glm.radians(yaw)) * math.cos(glm.radians(pitch))
+    camera.front = glm.normalize(camera.front)
 
     last_x = x_pos
     last_y = y_pos
 
-    return glm.normalize(camera_front), last_x, last_y, yaw, pitch
+    return last_x, last_y, yaw, pitch
 
 
-def check_polygonal_mode(window: glfw._GLFWwindow) -> None:
+def check_polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
     if glfw.get_key(window, glfw.KEY_P):
         camera.toggle_polygonal_mode()
 

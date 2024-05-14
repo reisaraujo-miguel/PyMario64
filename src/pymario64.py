@@ -7,12 +7,11 @@ if os.environ["XDG_SESSION_TYPE"] == "wayland":
 
 import glfw
 import glm
-import numpy as np
 import OpenGL.GL as gl
 
-import camera
 import input
 import setup
+from camera import Camera
 from object_3d import Object3D
 from scene import Scene
 
@@ -38,6 +37,8 @@ main_scene.add_object_to_scene(mario)
 
 main_scene.load_scene(program)
 
+camera: Camera = Camera(window)
+
 BG_RED: float = 0.5
 BG_BLUE: float = 0.5
 BG_GREEN: float = 0.5
@@ -49,23 +50,15 @@ delta_time: float = 0.0
 last_frame: float = glfw.get_time()
 
 camera_speed: float = 0.2
-camera_pos: glm.vec3 = glm.vec3(0.0, 0.0, 50.0)
-camera_front: glm.vec3 = glm.vec3(0.0, 0.0, -50.0)
-camera_up: glm.vec3 = glm.vec3(0.0, 50.0, 0.0)
 mouse_sensitivity: float = 0.2
-
-mat_projection: glm.mat4x4 = glm.mat4x4()
-mat_view: glm.mat4x4 = glm.mat4x4()
 
 yaw: float = -90.0
 pitch: float = 0.0
 last_x, last_y = glfw.get_cursor_pos(window)
 
 glfw.set_window_focus_callback(window, input.window_focus_callback)
-
 glfw.show_window(window)
 glfw.set_cursor_pos(window, last_x, last_y)
-
 gl.glEnable(gl.GL_DEPTH_TEST)
 
 while not glfw.window_should_close(window):
@@ -80,27 +73,16 @@ while not glfw.window_should_close(window):
     if input.window_lost_focus(window):
         last_x, last_y = glfw.get_cursor_pos(window)
 
-    camera_pos = input.move_camera_pos(
-        window, camera_pos, camera_front, camera_up, camera_speed
+    input.move_camera_pos(window, camera, camera_speed)
+
+    last_x, last_y, yaw, pitch = input.rotate_camera_view(
+        window, camera, last_x, last_y, yaw, pitch, mouse_sensitivity
     )
 
-    camera_front, last_x, last_y, yaw, pitch = input.move_camera_view(
-        window, last_x, last_y, yaw, pitch, mouse_sensitivity
-    )
+    input.check_polygonal_mode(window, camera)
 
-    input.check_polygonal_mode(window)
-
-    mat_view = camera.get_view_mat(camera_pos, camera_front, camera_up)
-
-    loc_view = gl.glGetUniformLocation(program, "view")
-    gl.glUniformMatrix4fv(loc_view, 1, gl.GL_TRUE, np.array(mat_view))
-
-    mat_projection = camera.get_projection_mat(mat_projection, height, width)
-
-    loc_projection = gl.glGetUniformLocation(program, "projection")
-    gl.glUniformMatrix4fv(
-        loc_projection, 1, gl.GL_TRUE, np.array(mat_projection)
-    )
+    camera.update_view(program)
+    camera.update_projection(program)
 
     main_scene.draw(program)
 
