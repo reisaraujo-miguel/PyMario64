@@ -55,10 +55,15 @@ def rotate_camera_view(
     yaw += x_offset
     pitch += y_offset
 
-    if pitch >= 90.0:
-        pitch = 90.0
-    if pitch <= -90.0:
-        pitch = -90.0
+    if pitch >= 85.0:
+        pitch = 85.0
+    elif pitch <= -85.0:
+        pitch = -85.0
+
+    if yaw >= 360.0:
+        yaw = -360.0
+    elif yaw <= -360.0:
+        yaw = 360.0
 
     camera.front.x = math.cos(glm.radians(yaw)) * math.cos(glm.radians(pitch))
     camera.front.y = math.sin(glm.radians(pitch))
@@ -81,11 +86,6 @@ def check_polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)
     if polygonal_mode is False:
         gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
-
-
-def window_focus_callback(window: glfw._GLFWwindow, focused: bool):
-    if focused:
-        glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 
 
 def window_lost_focus(

@@ -20,7 +20,7 @@ class Camera:
         self.polygonal_mode: bool = False
 
     def update_view(self, program: None) -> None:
-        self.mat_view: glm.mat4x4 = glm.lookAt(
+        self.mat_view = glm.lookAt(
             self.pos,
             self.pos + self.front,
             self.up,
@@ -42,8 +42,26 @@ class Camera:
             loc_projection, 1, gl.GL_TRUE, np.array(self.mat_projection)
         )
 
+    def toggle_polygonal_mode(self) -> None:
+        self.polygonal_mode = not self.polygonal_mode
+
     def get_polygonal_mode(self) -> bool:
         return self.polygonal_mode
 
-    def toggle_polygonal_mode(self) -> None:
-        self.polygonal_mode = not self.polygonal_mode
+    def set_pos(self, pos: glm.vec3):
+        self.pos = pos
+
+    def get_pos(self):
+        return self.pos
+
+    def set_front(self, front: glm.vec3):
+        self.front = front
+
+    def get_front(self):
+        return self.front
+
+    def set_up(self, up: glm.vec3):
+        self.up = up
+
+    def get_up(self):
+        return self.up

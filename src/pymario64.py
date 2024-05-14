@@ -15,8 +15,8 @@ from camera import Camera
 from object_3d import Object3D
 from scene import Scene
 
-height: float = 600
-width: float = 600
+height: float = 480
+width: float = 640
 
 window: glfw._GLFWwindow = setup.create_window(height, width)
 vertex, fragment, program = setup.init_shaders(
@@ -38,6 +38,9 @@ main_scene.add_object_to_scene(mario)
 main_scene.load_scene(program)
 
 camera: Camera = Camera(window)
+camera.set_front(glm.vec3(0.0, 0.0, -50.0))
+camera.set_pos(glm.vec3(0.0, 0.0, 50.0))
+camera.set_up(glm.vec3(0.0, 50.0, 0.0))
 
 BG_RED: float = 0.5
 BG_BLUE: float = 0.5
@@ -50,16 +53,18 @@ delta_time: float = 0.0
 last_frame: float = glfw.get_time()
 
 camera_speed: float = 0.2
-mouse_sensitivity: float = 0.2
+mouse_sensitivity: float = 0.1
 
 yaw: float = -90.0
 pitch: float = 0.0
-last_x, last_y = glfw.get_cursor_pos(window)
+last_x: float = glfw.get_cursor_pos(window)[0] / 2
+last_y: float = glfw.get_window_size(window)[1] / 2
 
-glfw.set_window_focus_callback(window, input.window_focus_callback)
-glfw.show_window(window)
+glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 glfw.set_cursor_pos(window, last_x, last_y)
 gl.glEnable(gl.GL_DEPTH_TEST)
+
+glfw.show_window(window)
 
 while not glfw.window_should_close(window):
     current_frame = glfw.get_time()

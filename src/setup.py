@@ -11,7 +11,7 @@ def create_window(height: int, width: int) -> glfw._GLFWwindow:
     glfw.window_hint(glfw.VISIBLE, glfw.FALSE)
     glfw.window_hint(glfw.FOCUS_ON_SHOW, glfw.TRUE)
     window: glfw._GLFWwindow = glfw.create_window(
-        height, width, "PyMario64", None, None
+        width, height, "PyMario64", None, None
     )
 
     glfw.make_context_current(window)
