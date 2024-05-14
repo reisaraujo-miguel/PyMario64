@@ -51,18 +51,10 @@ def rotate_camera_view(
     y_offset: float = (last_y - y_pos) * sensitivity
 
     camera.yaw += x_offset
-
-    if camera.yaw >= 360.0:
-        camera.yaw = -360.0
-    elif camera.yaw <= -360.0:
-        camera.yaw = 360.0
+    camera.yaw = (camera.yaw % 720) - 360
 
     camera.pitch += y_offset
-
-    if camera.pitch >= 85.0:
-        camera.pitch = 85.0
-    elif camera.pitch <= -85.0:
-        camera.pitch = -85.0
+    camera.pitch = max(-85, min(camera.pitch, 85))
 
     camera.front.x = math.cos(glm.radians(camera.yaw)) * math.cos(
         glm.radians(camera.pitch)
