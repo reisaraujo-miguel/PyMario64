@@ -62,7 +62,7 @@ def rotate_camera_view(
 
     if yaw >= 360.0:
         yaw = -360.0
-    elif yaw <= -360.0:
+    elif yaw < -360.0:
         yaw = 360.0
 
     camera.front.x = math.cos(glm.radians(yaw)) * math.cos(glm.radians(pitch))
