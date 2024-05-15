@@ -80,15 +80,15 @@ main_scene.load_scene(program)
 camera_speed: float = 10
 mouse_sensitivity: float = 4
 
-glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 gl.glEnable(gl.GL_DEPTH_TEST)
-
 glfw.show_window(window)
 
 delta_time: float = 0.0
 last_frame: float = glfw.get_time()
 
 while not glfw.window_should_close(window):
+    glfw.poll_events()
+
     current_frame = glfw.get_time()
     delta_time = current_frame - last_frame
     last_frame = current_frame
@@ -104,7 +104,6 @@ while not glfw.window_should_close(window):
 
     main_scene.draw_scene(program)
 
-    glfw.poll_events()
     glfw.swap_buffers(window)
 
 glfw.terminate()
