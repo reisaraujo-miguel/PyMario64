@@ -166,7 +166,7 @@ class Scene:
         )
 
     def draw_scene(self, program: None):
-        """Draw every object in the scene."""
+        """Draw every object in the scene and updates the camera."""
         loc_model: None = gl.glGetUniformLocation(program, "model")
 
         vertice_offset = 0
@@ -186,6 +186,7 @@ class Scene:
     def draw_object(
         self, obj: Object3D, loc_model: None, vertice_offset: int
     ) -> int:
+        """Draw and object"""
         gl.glUniformMatrix4fv(
             loc_model, 1, gl.GL_TRUE, np.array(obj.transform)
         )

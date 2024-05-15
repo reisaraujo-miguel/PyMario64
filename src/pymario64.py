@@ -77,8 +77,8 @@ main_scene.add_skybox_to_scene(skybox)
 
 main_scene.load_scene(program)
 
-camera_speed: float = 0.2
-mouse_sensitivity: float = 0.1
+camera_speed: float = 10
+mouse_sensitivity: float = 4
 
 glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 gl.glEnable(gl.GL_DEPTH_TEST)
@@ -97,10 +97,10 @@ while not glfw.window_should_close(window):
     gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
     gl.glClearColor(BG_RED, BG_GREEN, BG_BLUE, BG_ALPHA)
 
-    input.window_lost_focus(window)
-    input.check_polygonal_mode(window, camera)
-    input.move_camera_pos(window, camera, camera_speed)
-    input.rotate_camera_view(window, camera, mouse_sensitivity)
+    input.window_focus(window)
+    input.polygonal_mode(window, camera)
+    input.move_camera_pos(window, camera, camera_speed, delta_time)
+    input.rotate_camera_view(window, camera, mouse_sensitivity, delta_time)
 
     main_scene.draw_scene(program)
 

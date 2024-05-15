@@ -15,22 +15,25 @@ def move_camera_pos(
     window: glfw._GLFWwindow,
     camera: Camera,
     camera_speed: float,
+    delta_time: float,
 ) -> None:
     if (
         glfw.get_key(window, glfw.KEY_UP) or glfw.get_key(window, glfw.KEY_W)
     ) == glfw.PRESS:
-        camera.pos += camera_speed * camera.front
+        camera.pos += camera_speed * camera.front * delta_time
 
     elif (
         glfw.get_key(window, glfw.KEY_DOWN) or glfw.get_key(window, glfw.KEY_S)
     ) == glfw.PRESS:
-        camera.pos -= camera_speed * camera.front
+        camera.pos -= camera_speed * camera.front * delta_time
 
     elif (
         glfw.get_key(window, glfw.KEY_LEFT) or glfw.get_key(window, glfw.KEY_A)
     ) == glfw.PRESS:
         camera.pos -= (
-            glm.normalize(glm.cross(camera.front, camera.up)) * camera_speed
+            glm.normalize(glm.cross(camera.front, camera.up))
+            * camera_speed
+            * delta_time
         )
 
     elif (
@@ -38,7 +41,9 @@ def move_camera_pos(
         or glfw.get_key(window, glfw.KEY_D)
     ) == glfw.PRESS:
         camera.pos += (
-            glm.normalize(glm.cross(camera.front, camera.up)) * camera_speed
+            glm.normalize(glm.cross(camera.front, camera.up))
+            * camera_speed
+            * delta_time
         )
 
 
@@ -46,19 +51,20 @@ def rotate_camera_view(
     window: glfw._GLFWwindow,
     camera: Camera,
     sensitivity: float,
+    delta_time: float,
 ) -> None:
     global last_x, last_y
 
     x_pos, y_pos = glfw.get_cursor_pos(window)
 
-    x_offset: float = (x_pos - last_x) * sensitivity
-    y_offset: float = (last_y - y_pos) * sensitivity
+    x_offset: float = (x_pos - last_x) * sensitivity * delta_time
+    y_offset: float = (last_y - y_pos) * sensitivity * delta_time
 
     camera.yaw += x_offset
-    camera.yaw = (camera.yaw % 720.0) - 360.0
+    camera.yaw = camera.yaw % 360.0
 
     camera.pitch += y_offset
-    camera.pitch = max(-85.0, min(camera.pitch, 85.0))
+    camera.pitch = max(-80.0, min(camera.pitch, 80.0))
 
     camera.front.x = math.cos(glm.radians(camera.yaw)) * math.cos(
         glm.radians(camera.pitch)
@@ -73,7 +79,7 @@ def rotate_camera_view(
     last_y = y_pos
 
 
-def check_polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
+def polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
     polygonal_mode: bool = camera.polygonal_mode
 
     if polygonal_mode is True:
@@ -86,7 +92,7 @@ def check_polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
         sleep(0.08)
 
 
-def window_lost_focus(
+def window_focus(
     window: glfw._GLFWwindow,
 ) -> None:
     global last_x, last_y
