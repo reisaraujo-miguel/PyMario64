@@ -32,16 +32,40 @@ world.translate(glm.vec3(0, -6, 0))
 world.scale(glm.vec3(10.0, 10.0, 10.0))
 main_scene.add_object_to_scene(world)
 
-mario: Object3D = Object3D("../assets/mario/mario64.obj", 0)
+mario: Object3D = Object3D("../assets/mario/mario64.obj")
 mario.scale(glm.vec3(0.01, 0.01, 0.01))
 mario.translate(glm.vec3(0, -210, 0))
 main_scene.add_object_to_scene(mario)
 
-peach: Object3D = Object3D("../assets/peach/peach.obj", 0)
+peach: Object3D = Object3D("../assets/peach/peach.obj")
 peach.scale(glm.vec3(0.01, 0.01, 0.01))
 peach.translate(glm.vec3(0, 260, 5900))
 peach.rotate(glm.radians(180), glm.vec3(0, 1, 0))
 main_scene.add_object_to_scene(peach)
+
+yoshi: Object3D = Object3D("../assets/yoshi/yoshi.obj")
+yoshi.scale(glm.vec3(0.4, 0.4, 0.4))
+yoshi.translate(glm.vec3(-20, -3.7, 110))
+yoshi.rotate(glm.radians(45), glm.vec3(0, 1, 0))
+main_scene.add_object_to_scene(yoshi)
+
+toad: Object3D = Object3D("../assets/toad/toad.obj")
+toad.scale(glm.vec3(0.01, 0.01, 0.01))
+toad.translate(glm.vec3(800, -245, 5000))
+toad.rotate(glm.radians(-45), glm.vec3(0, 1, 0))
+main_scene.add_object_to_scene(toad)
+
+goomba: Object3D = Object3D("../assets/goomba/goomba.obj")
+goomba.scale(glm.vec3(0.03, 0.03, 0.03))
+goomba.translate(glm.vec3(-1300, -200, 130))
+goomba.rotate(glm.radians(45), glm.vec3(0, 1, 0))
+main_scene.add_object_to_scene(goomba)
+
+star: Object3D = Object3D("../assets/star/star.obj", 0)
+star.scale(glm.vec3(0.35, 0.35, 0.35))
+star.translate(glm.vec3(100, -15, -15))
+star.rotate(glm.radians(45), glm.vec3(0, 1, 0))
+main_scene.add_object_to_scene(star)
 
 main_scene.load_scene(program)
 
@@ -84,10 +108,10 @@ while not glfw.window_should_close(window):
 
     input.check_polygonal_mode(window, camera)
 
+    main_scene.draw(program)
+
     camera.update_view(program)
     camera.update_projection(program)
-
-    main_scene.draw(program)
 
     glfw.poll_events()
     glfw.swap_buffers(window)
