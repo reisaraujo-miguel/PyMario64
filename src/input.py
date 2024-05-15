@@ -7,6 +7,9 @@ import OpenGL.GL as gl
 
 from camera import Camera
 
+last_x: float
+last_y: float
+
 
 def move_camera_pos(
     window: glfw._GLFWwindow,
@@ -42,10 +45,10 @@ def move_camera_pos(
 def rotate_camera_view(
     window: glfw._GLFWwindow,
     camera: Camera,
-    last_x: float,
-    last_y: float,
     sensitivity: float,
-) -> tuple[float, float]:
+) -> None:
+    global last_x, last_y
+
     x_pos, y_pos = glfw.get_cursor_pos(window)
 
     x_offset: float = (x_pos - last_x) * sensitivity
@@ -69,8 +72,6 @@ def rotate_camera_view(
     last_x = x_pos
     last_y = y_pos
 
-    return last_x, last_y
-
 
 def check_polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
     polygonal_mode: bool = camera.polygonal_mode
@@ -87,12 +88,11 @@ def check_polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
 
 def window_lost_focus(
     window: glfw._GLFWwindow,
-) -> bool:
+) -> None:
+    global last_x, last_y
     if glfw.get_key(window, glfw.KEY_ESCAPE) == glfw.PRESS:
         glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_NORMAL)
-        return True
+        last_x, last_y = glfw.get_cursor_pos(window)
 
     elif glfw.get_mouse_button(window, glfw.MOUSE_BUTTON_LEFT) == glfw.PRESS:
         glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
-
-    return False

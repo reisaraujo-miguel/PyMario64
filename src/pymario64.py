@@ -25,7 +25,12 @@ vertex, fragment, program = setup.init_shaders(
     "./shaders/vertex.glsl", "./shaders/fragment.glsl"
 )
 
-main_scene: Scene = Scene(200)
+camera: Camera = Camera(window)
+camera.front = glm.vec3(0.0, 0.0, -50.0)
+camera.pos = glm.vec3(0.0, 0.0, 50.0)
+camera.up = glm.vec3(0.0, 50.0, 0.0)
+
+main_scene: Scene = Scene(200, camera)
 
 world: Object3D = Object3D("../assets/world/world.obj", 1)
 world.translate(glm.vec3(0, -6, 0))
@@ -61,26 +66,21 @@ goomba.translate(glm.vec3(-1300, -200, 130))
 goomba.rotate(glm.radians(45), glm.vec3(0, 1, 0))
 main_scene.add_object_to_scene(goomba)
 
-star: Object3D = Object3D("../assets/star/star.obj", 0)
+star: Object3D = Object3D("../assets/star/star.obj")
 star.scale(glm.vec3(0.35, 0.35, 0.35))
 star.translate(glm.vec3(100, -15, -15))
 star.rotate(glm.radians(45), glm.vec3(0, 1, 0))
 main_scene.add_object_to_scene(star)
 
-main_scene.load_scene(program)
+skybox: Object3D = Object3D("../assets/skybox/skybox.obj", 1)
+main_scene.add_skybox_to_scene(skybox)
 
-camera: Camera = Camera(window)
-camera.front = glm.vec3(0.0, 0.0, -50.0)
-camera.pos = glm.vec3(0.0, 0.0, 50.0)
-camera.up = glm.vec3(0.0, 50.0, 0.0)
+main_scene.load_scene(program)
 
 camera_speed: float = 0.2
 mouse_sensitivity: float = 0.1
-last_x: float = glfw.get_cursor_pos(window)[0] / 2
-last_y: float = glfw.get_window_size(window)[1] / 2
 
 glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
-glfw.set_cursor_pos(window, last_x, last_y)
 gl.glEnable(gl.GL_DEPTH_TEST)
 
 glfw.show_window(window)
@@ -97,21 +97,12 @@ while not glfw.window_should_close(window):
     gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
     gl.glClearColor(BG_RED, BG_GREEN, BG_BLUE, BG_ALPHA)
 
-    if input.window_lost_focus(window):
-        last_x, last_y = glfw.get_cursor_pos(window)
-
-    input.move_camera_pos(window, camera, camera_speed)
-
-    last_x, last_y = input.rotate_camera_view(
-        window, camera, last_x, last_y, mouse_sensitivity
-    )
-
+    input.window_lost_focus(window)
     input.check_polygonal_mode(window, camera)
+    input.move_camera_pos(window, camera, camera_speed)
+    input.rotate_camera_view(window, camera, mouse_sensitivity)
 
-    main_scene.draw(program)
-
-    camera.update_view(program)
-    camera.update_projection(program)
+    main_scene.draw_scene(program)
 
     glfw.poll_events()
     glfw.swap_buffers(window)

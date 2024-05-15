@@ -1,6 +1,7 @@
 import glfw
 import OpenGL.GL as gl
 
+import input
 import shaders
 
 
@@ -15,6 +16,9 @@ def create_window(height: int, width: int) -> glfw._GLFWwindow:
     )
 
     glfw.make_context_current(window)
+
+    input.last_x = width / 2
+    input.last_y = height / 2
 
     return window
 
