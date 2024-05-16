@@ -80,7 +80,7 @@ main_scene.add_skybox_to_scene(skybox)
 main_scene.load_scene(program)
 
 camera_speed: float = 10
-mario_speed: float = 100
+mario_speed: float = 10
 mouse_sensitivity: float = 4
 
 gl.glEnable(gl.GL_DEPTH_TEST)
@@ -102,7 +102,7 @@ while not glfw.window_should_close(window):
 
     input.window_focus(window)
     input.polygonal_mode(window, camera)
-    # input.move_camera_pos(window, camera, camera_speed, delta_time)
+    input.move_camera(window, camera, camera_speed, delta_time)
     input.rotate_camera(window, camera, mouse_sensitivity, delta_time)
     input.move_mario(window, mario, mario_speed, delta_time)
 

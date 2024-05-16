@@ -12,35 +12,26 @@ last_x: float
 last_y: float
 
 
-def move_camera_pos(
+def move_camera(
     window: glfw._GLFWwindow,
     camera: Camera,
     camera_speed: float,
     delta_time: float,
 ) -> None:
-    if (
-        glfw.get_key(window, glfw.KEY_UP) or glfw.get_key(window, glfw.KEY_W)
-    ) == glfw.PRESS:
+    if (glfw.get_key(window, glfw.KEY_UP)) == glfw.PRESS:
         camera.pos += camera_speed * camera.front * delta_time
 
-    elif (
-        glfw.get_key(window, glfw.KEY_DOWN) or glfw.get_key(window, glfw.KEY_S)
-    ) == glfw.PRESS:
+    elif (glfw.get_key(window, glfw.KEY_DOWN)) == glfw.PRESS:
         camera.pos -= camera_speed * camera.front * delta_time
 
-    elif (
-        glfw.get_key(window, glfw.KEY_LEFT) or glfw.get_key(window, glfw.KEY_A)
-    ) == glfw.PRESS:
+    elif (glfw.get_key(window, glfw.KEY_LEFT)) == glfw.PRESS:
         camera.pos -= (
             glm.normalize(glm.cross(camera.front, camera.up))
             * camera_speed
             * delta_time
         )
 
-    elif (
-        glfw.get_key(window, glfw.KEY_RIGHT)
-        or glfw.get_key(window, glfw.KEY_D)
-    ) == glfw.PRESS:
+    elif (glfw.get_key(window, glfw.KEY_RIGHT)) == glfw.PRESS:
         camera.pos += (
             glm.normalize(glm.cross(camera.front, camera.up))
             * camera_speed
@@ -78,32 +69,13 @@ def rotate_camera(
     x_pos, y_pos = glfw.get_cursor_pos(window)
 
     yaw_offset: float = (x_pos - last_x) * sensitivity * delta_time
-    pitch_offset: float = (y_pos - last_y) * sensitivity * delta_time
+    pitch_offset: float = (last_y - y_pos) * sensitivity * delta_time
 
     camera.yaw += yaw_offset
     camera.yaw = camera.yaw % 360.0
 
     camera.pitch += pitch_offset
-    camera.pitch = max(-50.0, min(camera.pitch, 4.0))
-
-    if camera.target is not None:
-        radius = glm.vec3(0.0, 1, 10)
-
-        camera.pos.x = camera.target.pos.x
-        camera.pos.y = camera.target.pos.y
-        camera.pos.z = camera.target.pos.z
-
-        radius = glm.rotate(
-            radius, math.radians(camera.pitch), glm.vec3(1, 0, 0)
-        )
-
-        radius = glm.rotate(
-            radius, math.radians(camera.yaw + 90), glm.vec3(0, -1, 0)
-        )
-
-        camera.pos.x += radius.x
-        camera.pos.y += radius.y
-        camera.pos.z += radius.z
+    camera.pitch = max(-80.0, min(camera.pitch, 80.0))
 
     camera.front.x = math.cos(glm.radians(camera.yaw)) * math.cos(
         glm.radians(camera.pitch)
