@@ -171,6 +171,8 @@ class Scene:
 
         vertice_offset = 0
 
+        # print(self.object_list[1].transform)
+
         if self.skybox is not None:
             gl.glDepthMask(gl.GL_FALSE)
             vertice_offset = self.draw_object(

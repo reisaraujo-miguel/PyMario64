@@ -11,8 +11,11 @@ class Object3D(Model3D):
         super().__init__(model_path, texture_wrap)
         self.pos: glm.vec3 = glm.vec3()
         self.angle: glm.vec3 = glm.vec3()
+        self.size: glm.vec3 = glm.vec3(1, 1, 1)
 
     def scale(self, size: glm.vec3):
+        print(size)
+        self.size *= size
         self.transform = glm.scale(self.transform, size)
 
     def rotate(self, angle: float, axis: glm.vec3, delta_time=1.0):
