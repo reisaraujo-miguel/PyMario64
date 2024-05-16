@@ -3,6 +3,8 @@ import glm
 import numpy as np
 import OpenGL.GL as gl
 
+from object_3d import Object3D
+
 
 class Camera:
 
@@ -10,8 +12,10 @@ class Camera:
         self.pos: glm.vec3 = glm.vec3()
         self.front: glm.vec3 = glm.vec3()
         self.up: glm.vec3 = glm.vec3()
+        self.target: Object3D | None = None
+        self.distance_to_target: float = 10.0
 
-        self.yaw: float = -90.0
+        self.yaw: float = 0.0
         self.pitch: float = 0.0
 
         self.mat_view: glm.mat4x4 = glm.mat4()
@@ -23,6 +27,7 @@ class Camera:
         self.polygonal_mode: bool = False
 
     def update_view(self, program: None) -> None:
+
         self.mat_view = glm.lookAt(
             self.pos,
             self.pos + self.front,
