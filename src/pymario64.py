@@ -41,8 +41,6 @@ mario.translate(glm.vec3(0, 4, -10))
 mario.scale(glm.vec3(0.01, 0.01, 0.01))
 main_scene.add_object_to_scene(mario)
 
-camera.target = mario
-
 peach: Object3D = Object3D("../assets/peach/peach.obj")
 peach.translate(glm.vec3(0, 8.5, 60))
 peach.scale(glm.vec3(0.01, 0.01, 0.01))
@@ -100,8 +98,6 @@ while not glfw.window_should_close(window):
     gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
     gl.glClearColor(BG_RED, BG_GREEN, BG_BLUE, BG_ALPHA)
 
-    main_scene.draw_scene(program)
-
     input.window_focus(window)
     input.polygonal_mode(window, camera)
     input.move_mario(window, mario, mario_speed, delta_time)
@@ -109,6 +105,8 @@ while not glfw.window_should_close(window):
 
     input.move_camera(window, camera, camera_speed, delta_time)
     input.rotate_camera(window, camera, mouse_sensitivity, delta_time)
+
+    main_scene.draw_scene(program)
 
     glfw.swap_buffers(window)
 

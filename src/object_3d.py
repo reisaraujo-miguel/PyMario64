@@ -14,7 +14,6 @@ class Object3D(Model3D):
         self.size: glm.vec3 = glm.vec3(1, 1, 1)
 
     def scale(self, size: glm.vec3):
-        print(size)
         self.size *= size
         self.transform = glm.scale(self.transform, size)
 
