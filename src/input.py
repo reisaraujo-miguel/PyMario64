@@ -22,7 +22,10 @@ def move_camera(
         camera.pos += camera_speed * camera.front * delta_time
 
     elif (glfw.get_key(window, glfw.KEY_DOWN)) == glfw.PRESS:
-        camera.pos -= camera_speed * camera.front * delta_time
+        if camera.pos.y <= 2:
+            pass
+        else:
+            camera.pos -= camera_speed * camera.front * delta_time
 
     elif (glfw.get_key(window, glfw.KEY_LEFT)) == glfw.PRESS:
         camera.pos -= (
