@@ -30,6 +30,8 @@ camera.front = glm.vec3(0.0, 0.0, 0.0)
 camera.pos = glm.vec3(0.0, 6, -15)
 camera.up = glm.vec3(0.0, 50.0, 0.0)
 
+camera.set_distance_to_center(glm.vec3(-8, 1, 0))
+
 main_scene: Scene = Scene(200, camera)
 
 world: Object3D = Object3D("../assets/world/world.obj", 1)
@@ -39,9 +41,9 @@ main_scene.add_object_to_scene(world)
 mario: Object3D = Object3D("../assets/mario/mario64.obj")
 mario.set_pos(glm.vec3(0, 4, -10))
 mario.set_scale(glm.vec3(0.01, 0.01, 0.01))
+mario.camera = camera
+camera.pos = mario.position + camera.radius
 main_scene.add_object_to_scene(mario)
-
-camera.target = mario
 
 peach: Object3D = Object3D("../assets/peach/peach.obj")
 peach.set_pos(glm.vec3(0, 8.5, 60))
@@ -81,7 +83,7 @@ main_scene.load_scene(program)
 
 camera_speed: float = 15
 mario_speed: float = 15
-mouse_sensitivity: float = 4
+mouse_sensitivity: float = 0.1
 
 gl.glEnable(gl.GL_DEPTH_TEST)
 glfw.show_window(window)
@@ -102,10 +104,9 @@ while not glfw.window_should_close(window):
 
     input.window_focus(window)
     input.polygonal_mode(window, camera)
-    # input.move_camera_pos(window, camera, camera_speed, delta_time)
+    input.rotate_camera(window, camera, mouse_sensitivity, delta_time)
     input.move_mario(window, mario, mario_speed, delta_time)
     input.transform_mario(window, mario, delta_time)
-    input.rotate_camera(window, camera, mouse_sensitivity, delta_time)
 
     main_scene.draw_scene(program)
 

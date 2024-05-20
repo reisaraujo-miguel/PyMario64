@@ -1,5 +1,6 @@
 import glm
 
+from camera import Camera
 from model_3d import Model3D
 
 
@@ -16,6 +17,8 @@ class Object3D(Model3D):
         self.position: glm.vec3 = glm.vec3()
         self.rotation: glm.vec3 = glm.vec3()
         self.size: glm.vec3 = glm.vec3()
+
+        self.camera: Camera | None = None
 
     def scale(self, speed: float, delta_time=1.0) -> None:
         """
@@ -54,7 +57,17 @@ class Object3D(Model3D):
 
         `speed` defines the amount of pixels the object will be translated
         (relative to it's previous position) in one second.
+
+        If there a camera was set, then the object axes will always be treated
+        in relation to the camera view.
         """
+        if self.camera is not None:
+            speed = glm.rotate(
+                speed, -self.camera.yaw + glm.radians(90), glm.vec3(0, 1, 0)
+            )
+
+            self.camera.pos = self.position + self.camera.radius
+
         self.translation_mat = glm.translate(
             self.translation_mat, speed * delta_time
         )

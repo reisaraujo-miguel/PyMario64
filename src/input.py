@@ -12,71 +12,59 @@ last_x: float
 last_y: float
 
 
-def move_camera_pos(
-    window: glfw._GLFWwindow,
-    camera: Camera,
-    camera_speed: float,
-    delta_time: float,
-) -> None:
-    if (
-        glfw.get_key(window, glfw.KEY_UP) or glfw.get_key(window, glfw.KEY_W)
-    ) == glfw.PRESS:
-        camera.pos += camera_speed * camera.front * delta_time
-
-    elif (
-        glfw.get_key(window, glfw.KEY_DOWN) or glfw.get_key(window, glfw.KEY_S)
-    ) == glfw.PRESS:
-        camera.pos -= camera_speed * camera.front * delta_time
-
-    elif (
-        glfw.get_key(window, glfw.KEY_LEFT) or glfw.get_key(window, glfw.KEY_A)
-    ) == glfw.PRESS:
-        camera.pos -= (
-            glm.normalize(glm.cross(camera.front, camera.up))
-            * camera_speed
-            * delta_time
-        )
-
-    elif (
-        glfw.get_key(window, glfw.KEY_RIGHT)
-        or glfw.get_key(window, glfw.KEY_D)
-    ) == glfw.PRESS:
-        camera.pos += (
-            glm.normalize(glm.cross(camera.front, camera.up))
-            * camera_speed
-            * delta_time
-        )
-
-
 def move_mario(
     window: glfw._GLFWwindow,
     mario: Object3D,
     speed: float,
     delta_time: float,
 ) -> None:
+    camera: Camera | None = mario.camera
+
     if (glfw.get_key(window, glfw.KEY_W)) == glfw.PRESS:
         if mario.position.z < 90:
             mario.translate(glm.vec3(0, 0, speed), delta_time)
+
+        if camera is not None:
+            mario.set_rotation(
+                -camera.yaw + glm.radians(90), glm.vec3(0, 1, 0)
+            )
 
     elif (glfw.get_key(window, glfw.KEY_S)) == glfw.PRESS:
         if mario.position.z > -60:
             mario.translate(glm.vec3(0, 0, -speed), delta_time)
 
+        if camera is not None:
+            mario.set_rotation(
+                -camera.yaw + glm.radians(-90), glm.vec3(0, 1, 0)
+            )
+
     elif (glfw.get_key(window, glfw.KEY_A)) == glfw.PRESS:
         if mario.position.x < 60:
             mario.translate(glm.vec3(speed, 0, 0), delta_time)
+
+        if camera is not None:
+            mario.set_rotation(
+                -camera.yaw + glm.radians(-180), glm.vec3(0, 1, 0)
+            )
 
     elif (glfw.get_key(window, glfw.KEY_D)) == glfw.PRESS:
         if mario.position.x > -60:
             mario.translate(glm.vec3(-speed, 0, 0), delta_time)
 
+        if camera is not None:
+            mario.set_rotation(-camera.yaw, glm.vec3(0, 1, 0))
+
+    # Updates the camera position
+    if mario.camera is not None:
+        mario.camera.pos = mario.position + mario.camera.radius
+
 
 def transform_mario(window, mario, delta_time):
     sleep(0.01)
     if glfw.get_key(window, glfw.KEY_E) == glfw.PRESS:
-        mario.rotate(math.radians(180 * delta_time), glm.vec3(0, 1, 0))
+        mario.rotate(math.radians(180) * delta_time, glm.vec3(0, 1, 0))
     elif glfw.get_key(window, glfw.KEY_Q) == glfw.PRESS:
-        mario.rotate(-math.radians(180 * delta_time), glm.vec3(0, 1, 0))
+        mario.rotate(math.radians(-180) * delta_time, glm.vec3(0, 1, 0))
     elif glfw.get_key(window, glfw.KEY_EQUAL) == glfw.PRESS:
         mario.scale(1, delta_time)
     elif glfw.get_key(window, glfw.KEY_MINUS) == glfw.PRESS:
@@ -93,35 +81,24 @@ def rotate_camera(
 
     x_pos, y_pos = glfw.get_cursor_pos(window)
 
-    yaw_offset: float = (x_pos - last_x) * sensitivity * delta_time
+    yaw_offset: float = (last_x - x_pos) * sensitivity * delta_time
     pitch_offset: float = (y_pos - last_y) * sensitivity * delta_time
 
     camera.yaw += yaw_offset
-    camera.yaw = camera.yaw % 360.0
+    camera.yaw = camera.yaw % glm.radians(360.0)
 
     camera.pitch += pitch_offset
-    camera.pitch = max(-50.0, min(camera.pitch, 4.0))
+    camera.pitch = max(glm.radians(-50.0), min(camera.pitch, glm.radians(4.0)))
 
-    if camera.target is not None:
-        radius = glm.vec3(0.0, 1, 8)
+    camera.radius = camera.distance_to_center
 
-        radius = glm.rotate(
-            radius, math.radians(camera.pitch), glm.vec3(1, 0, 0)
-        )
+    camera.radius = glm.rotate(camera.radius, camera.pitch, glm.vec3(0, 0, 1))
 
-        radius = glm.rotate(
-            radius, math.radians(camera.yaw + 90), glm.vec3(0, -1, 0)
-        )
+    camera.radius = glm.rotate(camera.radius, -camera.yaw, glm.vec3(0, 1, 0))
 
-        camera.pos = camera.target.position + radius
-
-    camera.front.x = math.cos(glm.radians(camera.yaw)) * math.cos(
-        glm.radians(camera.pitch)
-    )
-    camera.front.y = math.sin(glm.radians(camera.pitch))
-    camera.front.z = math.sin(glm.radians(camera.yaw)) * math.cos(
-        glm.radians(camera.pitch)
-    )
+    camera.front.x = math.cos(camera.yaw) * math.cos(camera.pitch)
+    camera.front.y = math.sin(camera.pitch)
+    camera.front.z = math.sin(camera.yaw) * math.cos(camera.pitch)
     camera.front = glm.normalize(camera.front)
 
     last_x = x_pos
