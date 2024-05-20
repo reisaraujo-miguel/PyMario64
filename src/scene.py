@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import glm
+# import glm
 import numpy as np
 import OpenGL.GL as gl
 from PIL import Image
@@ -188,7 +188,7 @@ class Scene:
     ) -> int:
         """Draw and object"""
         gl.glUniformMatrix4fv(
-            loc_model, 1, gl.GL_TRUE, np.array(obj.transform)
+            loc_model, 1, gl.GL_TRUE, np.array(obj.get_transformation())
         )
 
         for mesh in obj.mesh_list:
@@ -215,7 +215,7 @@ class Scene:
 
     def update_camera(self, program: None):
         if self.skybox is not None:
-            self.skybox.transform = glm.translate(self.camera.pos)
+            self.skybox.set_pos(self.camera.pos)
 
         self.camera.update_view(program)
         self.camera.update_projection(program)

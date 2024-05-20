@@ -55,16 +55,32 @@ def move_mario(
     delta_time: float,
 ) -> None:
     if (glfw.get_key(window, glfw.KEY_W)) == glfw.PRESS:
-        mario.translate(glm.vec3(0, 0, speed), delta_time)
+        if mario.position.z < 90:
+            mario.translate(glm.vec3(0, 0, speed), delta_time)
 
     elif (glfw.get_key(window, glfw.KEY_S)) == glfw.PRESS:
-        mario.translate(glm.vec3(0, 0, -speed), delta_time)
+        if mario.position.z > -60:
+            mario.translate(glm.vec3(0, 0, -speed), delta_time)
 
     elif (glfw.get_key(window, glfw.KEY_A)) == glfw.PRESS:
-        mario.translate(glm.vec3(speed, 0, 0), delta_time)
+        if mario.position.x < 60:
+            mario.translate(glm.vec3(speed, 0, 0), delta_time)
 
     elif (glfw.get_key(window, glfw.KEY_D)) == glfw.PRESS:
-        mario.translate(glm.vec3(-speed, 0, 0), delta_time)
+        if mario.position.x > -60:
+            mario.translate(glm.vec3(-speed, 0, 0), delta_time)
+
+
+def transform_mario(window, mario, delta_time):
+    sleep(0.01)
+    if glfw.get_key(window, glfw.KEY_E) == glfw.PRESS:
+        mario.rotate(math.radians(180 * delta_time), glm.vec3(0, 1, 0))
+    elif glfw.get_key(window, glfw.KEY_Q) == glfw.PRESS:
+        mario.rotate(-math.radians(180 * delta_time), glm.vec3(0, 1, 0))
+    elif glfw.get_key(window, glfw.KEY_EQUAL) == glfw.PRESS:
+        mario.scale(1, delta_time)
+    elif glfw.get_key(window, glfw.KEY_MINUS) == glfw.PRESS:
+        mario.scale(-1, delta_time)
 
 
 def rotate_camera(
@@ -87,11 +103,7 @@ def rotate_camera(
     camera.pitch = max(-50.0, min(camera.pitch, 4.0))
 
     if camera.target is not None:
-        radius = glm.vec3(0.0, 1, 10)
-
-        camera.pos.x = camera.target.pos.x
-        camera.pos.y = camera.target.pos.y
-        camera.pos.z = camera.target.pos.z
+        radius = glm.vec3(0.0, 1, 8)
 
         radius = glm.rotate(
             radius, math.radians(camera.pitch), glm.vec3(1, 0, 0)
@@ -101,9 +113,7 @@ def rotate_camera(
             radius, math.radians(camera.yaw + 90), glm.vec3(0, -1, 0)
         )
 
-        camera.pos.x += radius.x
-        camera.pos.y += radius.y
-        camera.pos.z += radius.z
+        camera.pos = camera.target.position + radius
 
     camera.front.x = math.cos(glm.radians(camera.yaw)) * math.cos(
         glm.radians(camera.pitch)
