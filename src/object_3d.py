@@ -66,8 +66,6 @@ class Object3D(Model3D):
                 speed, -self.camera.yaw + glm.radians(90), glm.vec3(0, 1, 0)
             )
 
-            self.camera.pos = self.position + self.camera.radius
-
         self.translation_mat = glm.translate(
             self.translation_mat, speed * delta_time
         )
