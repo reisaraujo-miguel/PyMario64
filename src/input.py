@@ -53,19 +53,19 @@ def move_mario(
     delta_time: float,
 ) -> None:
     if (glfw.get_key(window, glfw.KEY_W)) == glfw.PRESS:
-        if mario.pos.z < 90:
+        if mario.position.z < 90:
             mario.translate(glm.vec3(0, 0, speed), delta_time)
 
     elif (glfw.get_key(window, glfw.KEY_S)) == glfw.PRESS:
-        if mario.pos.z > -60:
+        if mario.position.z > -60:
             mario.translate(glm.vec3(0, 0, -speed), delta_time)
 
     elif (glfw.get_key(window, glfw.KEY_A)) == glfw.PRESS:
-        if mario.pos.x < 60:
+        if mario.position.x < 60:
             mario.translate(glm.vec3(speed, 0, 0), delta_time)
 
     elif (glfw.get_key(window, glfw.KEY_D)) == glfw.PRESS:
-        if mario.pos.x > -60:
+        if mario.position.x > -60:
             mario.translate(glm.vec3(-speed, 0, 0), delta_time)
 
 
@@ -77,9 +77,9 @@ def transform_mario(window, mario, delta_time):
         mario.rotate(-math.radians(180 * delta_time), glm.vec3(0, 1, 0))
     elif glfw.get_key(window, glfw.KEY_EQUAL) == glfw.PRESS:
         # print(mario.size.x)
-        mario.scale(glm.vec3(glm.exp2(1 * delta_time)))
+        mario.scale(1, delta_time)
     elif glfw.get_key(window, glfw.KEY_MINUS) == glfw.PRESS:
-        mario.scale(glm.vec3(glm.exp2(-1 * delta_time)))
+        mario.scale(-1, delta_time)
 
 
 def rotate_camera(
