@@ -5,12 +5,15 @@ description = "Little Super Mario 64 \"clone\" written in Python"
 authors = ["reisaraujo-miguel <reisaraujo.miguel@gmail.com>"]
 license = "GPLv3"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
 glfw = "^2.7.0"
 PyOpenGL = "^3.1.7"
 numpy = "^1.26.4"
+pyglm = "^2.7.1"
+pillow = "^10.3.0"
 
 
 [build-system]

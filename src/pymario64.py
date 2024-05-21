@@ -70,11 +70,10 @@ goomba.set_rotation(glm.radians(45), glm.vec3(0, 1, 0))
 main_scene.add_object_to_scene(goomba)
 
 star: Object3D = Object3D("../assets/star/star.obj")
-star.set_pos(glm.vec3(46, -0.5, -14))
+star.set_pos(glm.vec3(46, 0, -14))
 star.set_scale(glm.vec3(0.35, 0.35, 0.35))
 star.set_rotation(glm.radians(-45), glm.vec3(0, 1, 0))
 main_scene.add_object_to_scene(star)
-
 
 skybox: Object3D = Object3D("../assets/skybox/skybox.obj", 1)
 main_scene.add_skybox_to_scene(skybox)
