@@ -22,7 +22,7 @@ BG_ALPHA: float = 1.0
 
 window: glfw._GLFWwindow = setup.create_window(480, 640)
 vertex, fragment, program = setup.init_shaders(
-    "./shaders/vertex.glsl", "./shaders/fragment.glsl"
+    "./shaders/vertex.vert", "./shaders/fragment.frag"
 )
 
 camera: Camera = Camera(window)
