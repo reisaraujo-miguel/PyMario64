@@ -9,7 +9,7 @@ uniform sampler2D samplerTexture;
 void main() {
     vec4 texture = texture2D(samplerTexture, out_texture);
 
-    if (texture.a != 1.0) {
+    if (texture.a != 1.0f) {
         discard;
     }
 
