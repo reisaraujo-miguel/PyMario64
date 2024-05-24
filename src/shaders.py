@@ -13,15 +13,15 @@ def get_shaders(vertex_file: str, fragment_file: str) -> tuple[None, None]:
         with open(abs_vertex_path, "r") as file:
             vertex_code: str = file.read()
     except IOError as e:
-        print(f"I't wasn't possible to open: \"{abs_vertex_path}\"\n{e}\n")
-        raise RuntimeError("Error opening file!")
+        print(f"I't wasn't possible to open: \"{abs_vertex_path}\"\n")
+        raise e
 
     try:
         with open(abs_fragment_path, "r") as file:
             fragment_code: str = file.read()
     except IOError as e:
-        print(f"I't wasn't possible to open: \"{abs_fragment_path}\"\n{e}\n")
-        raise RuntimeError("Error opening file!")
+        print(f"I't wasn't possible to open: \"{abs_fragment_path}\"\n")
+        raise e
 
     vertex: None = gl.glCreateShader(gl.GL_VERTEX_SHADER)
     fragment: None = gl.glCreateShader(gl.GL_FRAGMENT_SHADER)

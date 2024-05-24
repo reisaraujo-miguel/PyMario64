@@ -25,6 +25,8 @@ vertex, fragment, program = setup.init_shaders(
     "./shaders/vertex.vert", "./shaders/fragment.frag"
 )
 
+print(gl.glGetString(gl.GL_VERSION))
+
 camera: Camera = Camera(window)
 camera.front = glm.vec3(0.0, 0.0, 0.0)
 camera.pos = glm.vec3(0.0, 6, -15)

@@ -217,5 +217,10 @@ class Scene:
         if self.skybox is not None:
             self.skybox.set_pos(self.camera.pos)
 
+        if self.camera.polygonal_mode is True:
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)
+        else:
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
+
         self.camera.update_view(program)
         self.camera.update_projection(program)

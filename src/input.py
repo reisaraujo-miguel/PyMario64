@@ -1,15 +1,15 @@
 import math
-from time import sleep
 
 import glfw
 import glm
-import OpenGL.GL as gl
 
 from camera import Camera
 from object_3d import Object3D
 
 last_x: float
 last_y: float
+
+toggle_flag: bool = False
 
 
 def move_mario(
@@ -18,55 +18,53 @@ def move_mario(
     speed: float,
     delta_time: float,
 ) -> None:
-    camera: Camera | None = mario.camera
+    try:
+        assert mario.camera
+    except AssertionError as e:
+        print('The player instance must have a "Camera" object!\n')
+        raise e
+
+    movement_vector: glm.vec3 = glm.vec3()
+    angle: float = 0
+    qt_btn_pressed: int = 0
 
     if (glfw.get_key(window, glfw.KEY_W)) == glfw.PRESS:
         if mario.position.z < 90:
-            mario.translate(glm.vec3(0, 0, speed), delta_time)
-
-        if camera is not None:
-            mario.set_rotation(
-                -camera.yaw + glm.radians(90), glm.vec3(0, 1, 0)
-            )
+            movement_vector += glm.vec3(0, 0, 1)
+            qt_btn_pressed += 1
 
     elif (glfw.get_key(window, glfw.KEY_S)) == glfw.PRESS:
         if mario.position.z > -60:
-            mario.translate(glm.vec3(0, 0, -speed), delta_time)
+            movement_vector += glm.vec3(0, 0, -1)
+            angle = glm.radians(-180)
+            qt_btn_pressed += 1
 
-        if camera is not None:
-            mario.set_rotation(
-                -camera.yaw + glm.radians(-90), glm.vec3(0, 1, 0)
-            )
-
-    elif (glfw.get_key(window, glfw.KEY_A)) == glfw.PRESS:
+    if (glfw.get_key(window, glfw.KEY_A)) == glfw.PRESS:
         if mario.position.x < 60:
-            mario.translate(glm.vec3(speed, 0, 0), delta_time)
-
-        if camera is not None:
-            mario.set_rotation(
-                -camera.yaw + glm.radians(-180), glm.vec3(0, 1, 0)
-            )
+            movement_vector += glm.vec3(1, 0, 0)
+            qt_btn_pressed += 1
+            angle = (abs(angle) + glm.radians(90)) / qt_btn_pressed
 
     elif (glfw.get_key(window, glfw.KEY_D)) == glfw.PRESS:
         if mario.position.x > -60:
-            mario.translate(glm.vec3(-speed, 0, 0), delta_time)
+            movement_vector += glm.vec3(-1, 0, 0)
+            qt_btn_pressed += 1
+            angle = (angle + glm.radians(-90)) / qt_btn_pressed
 
-        if camera is not None:
-            mario.set_rotation(-camera.yaw, glm.vec3(0, 1, 0))
+    movement_vector = glm.normalize(movement_vector)
+    angle += glm.radians(90)
 
-    # Updates the camera position
-    if mario.camera is not None:
-        mario.camera.pos = mario.position + mario.camera.radius
+    if qt_btn_pressed > 0:
+        mario.translate(movement_vector * speed, delta_time)
+        mario.set_rotation(-mario.camera.yaw + angle, glm.vec3(0, 1, 0))
+
+    mario.camera.pos = mario.position + mario.camera.radius
 
 
 def transform_mario(window, mario, delta_time):
-    sleep(0.01)
-    if glfw.get_key(window, glfw.KEY_E) == glfw.PRESS:
-        mario.rotate(math.radians(180) * delta_time, glm.vec3(0, 1, 0))
-    elif glfw.get_key(window, glfw.KEY_Q) == glfw.PRESS:
-        mario.rotate(math.radians(-180) * delta_time, glm.vec3(0, 1, 0))
-    elif glfw.get_key(window, glfw.KEY_EQUAL) == glfw.PRESS:
+    if glfw.get_key(window, glfw.KEY_EQUAL) == glfw.PRESS:
         mario.scale(1, delta_time)
+
     elif glfw.get_key(window, glfw.KEY_MINUS) == glfw.PRESS:
         mario.scale(-1, delta_time)
 
@@ -106,16 +104,16 @@ def rotate_camera(
 
 
 def polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
-    polygonal_mode: bool = camera.polygonal_mode
+    global toggle_flag
 
-    if polygonal_mode is True:
-        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)
-    if polygonal_mode is False:
-        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
-
+    # This ensures the mode is toggled only after the key is released,
+    # avoiding toggling it on and off when the key is held down.
     if glfw.get_key(window, glfw.KEY_P) == glfw.PRESS:
+        toggle_flag = True
+
+    elif toggle_flag is True:
         camera.toggle_polygonal_mode()
-        sleep(0.08)
+        toggle_flag = False
 
 
 def window_focus(
