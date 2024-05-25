@@ -9,7 +9,7 @@ from object_3d import Object3D
 last_x: float
 last_y: float
 
-toggle_flag: bool = False
+poly_mode_toggled: bool = False
 
 
 def move_mario(
@@ -104,16 +104,19 @@ def rotate_camera(
 
 
 def polygonal_mode(window: glfw._GLFWwindow, camera: Camera) -> None:
-    global toggle_flag
+    global poly_mode_toggled
 
     # This ensures the mode is toggled only after the key is released,
     # avoiding toggling it on and off when the key is held down.
-    if glfw.get_key(window, glfw.KEY_P) == glfw.PRESS:
-        toggle_flag = True
-
-    elif toggle_flag is True:
+    if (
+        glfw.get_key(window, glfw.KEY_P) == glfw.PRESS
+        and not poly_mode_toggled
+    ):
         camera.toggle_polygonal_mode()
-        toggle_flag = False
+        poly_mode_toggled = True
+
+    elif glfw.get_key(window, glfw.KEY_P) == glfw.RELEASE:
+        poly_mode_toggled = False
 
 
 def window_focus(
